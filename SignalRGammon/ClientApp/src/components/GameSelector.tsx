@@ -1,14 +1,17 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 
-export function GameSelector(props: { children: React.ReactNode }) {
+export function GameSelector(props: { children?: never }) {
     return (
-        <div>
-            <button onClick={onNewGame}>New Game</button>
-        </div>
+        <>
+            <div>
+                <Link to="/backgammon">Backgammon</Link>
+            </div>
+            <hr/>
+            <div>
+                <Link to="/licenses">Licenses</Link>
+            </div>
+        </>
     );
-
-    function onNewGame() {
-
-    }
 }

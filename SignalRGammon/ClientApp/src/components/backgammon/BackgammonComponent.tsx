@@ -1,37 +1,23 @@
-import React, { useMemo, useEffect, useState } from 'react';
-import { BehaviorSubject } from 'rxjs';
-import { HubConnectionBuilder } from '@microsoft/signalr';
+import React, { useMemo, useState } from 'react';
+import { from } from 'rxjs';
+import { switchMap, tap } from 'rxjs/operators';
+import { fromSignalR } from '../../utils/fromSignalR';
+import { useRx } from '../../utils/useRx';
+import { useGameConnection } from '../../services/gameConnectionContext';
+import { BackgammonState } from './BackgammonState';
 
-export interface BackgammonState
-{
-    currentPlayer: 'White' | 'Black';
-    whiteDiceRolls: number[];
-    blackDiceRolls: number[];
-    points: { white: number, black: number }[];
-    fence: { white: number, black: number };
-}
-
-export function BackgammonComponent(props: { children: React.ReactNode }) {
-    const gameState = useMemo(() => new BehaviorSubject<BackgammonState | null>(null), []);
-    const connection = useMemo(() => new HubConnectionBuilder().withUrl("/gameHub").build(), []);
+export function BackgammonComponent() {
     const [gameId, setGameId] = useState<null | string>(null);
+    const [connection, connected] = useGameConnection();
 
-    useEffect(function makeGame() {
-
-        connection.start().then(async function () {
-            const gameId = await connection.invoke("CreateGame", "backgammon");
-            setGameId(gameId);
-            connection.stream('ListenState', gameId)
-                .subscribe(gameState);
-        }).catch(function (err) {
-            return console.error(err.toString());
-        });
-
-    }, [connection]);
-
-    useEffect(function logGameState() {
-        gameState.subscribe(v => console.log(v));
-    });
+    const createGameAndListen = useMemo(() => connected
+        .pipe(
+            switchMap(() => from(connection.invoke<string>("CreateGame", "backgammon"))),
+            tap(setGameId),
+            switchMap(gameId => fromSignalR<BackgammonState>(connection.stream('ListenState', gameId)))
+        ), [connected]);
+    const gameState = useRx(createGameAndListen, null);
+    console.log(gameState);
 
     return (
         <div>
