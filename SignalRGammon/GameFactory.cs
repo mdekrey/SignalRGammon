@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SignalRGammon.Backgammon;
+using System;
 
 namespace SignalRGammon
 {
@@ -8,7 +9,7 @@ namespace SignalRGammon
         {
             return gameType switch
             {
-                "backgammon" => new Backgammon.BackgammonGame(),
+                "backgammon" => new Backgammon.BackgammonGame(new DieRoller()),
                 _ => throw new NotImplementedException()
             };
         }

@@ -6,41 +6,49 @@ using System.Threading.Tasks;
 
 namespace SignalRGammon.Backgammon
 {
+    using PointState = PlayerState<int>;
+    using DiceState = PlayerState<IReadOnlyList<int>>;
+
     public enum Player
     {
         White,
         Black,
     }
 
-
-    public readonly struct PointState
+    public readonly struct PlayerState<T>
     {
-        public readonly int White;
-        public readonly int Black;
+        public readonly T White;
+        public readonly T Black;
 
-        public PointState(int white = 0, int black = 0)
+        public PlayerState(T white, T black)
         {
             White = white;
             Black = black;
         }
 
-        public PointState(Player player, int count) : this(0, 0)
+        public PlayerState(Player player, T value, T otherValue) : this(otherValue, otherValue)
         {
+
             if (player == Player.White)
-                White = count;
+                White = value;
             else
-                Black = count;
+                Black = value;
         }
 
-        public int this[Player player] => player == Player.White ? White : Black;
+        public T this[Player player] => player == Player.White ? White : Black;
 
-        public PointState With(Player player, int count) =>
-            new PointState(
-                white: player == Player.White ? count : White,
-                black: player == Player.Black ? count : Black
+        public PlayerState<T> With(Player player, T value) =>
+            new PlayerState<T>(
+                white: player == Player.White ? value : White,
+                black: player == Player.Black ? value : Black
             );
+    }
 
-        public static PointState Empty = new PointState();
+
+    public static class Defaults
+    {
+        public static DiceState EmptyDiceRolls = new DiceState(Array.Empty<int>(), Array.Empty<int>());
+        public static PointState EmptyPoint = new PointState(0, 0);
     }
 
     public struct BackgammonState
@@ -48,10 +56,9 @@ namespace SignalRGammon.Backgammon
         [JsonIgnore]
         public IDieRoller DieRoller { get; private set; }
         public Player? CurrentPlayer { get; private set; }
-        public IReadOnlyList<int> WhiteDiceRolls { get; private set; }
-        public IReadOnlyList<int> BlackDiceRolls { get; private set; }
+        public DiceState DiceRolls { get; private set; }
         public IReadOnlyList<PointState> Points { get; private set; }
-        public PointState Fence { get; private set; }
+        public PointState Bar { get; private set; }
 
         public BackgammonState(IDieRoller dieRoller) : this()
         {
@@ -62,38 +69,37 @@ namespace SignalRGammon.Backgammon
         {
             this.DieRoller = original.DieRoller;
             this.CurrentPlayer = original.CurrentPlayer;
-            this.WhiteDiceRolls = original.WhiteDiceRolls;
-            this.BlackDiceRolls = original.BlackDiceRolls;
+            this.DiceRolls = original.DiceRolls;
             this.Points = original.Points;
-            this.Fence = original.Fence;
+            this.Bar = original.Bar;
         }
 
         private static IReadOnlyList<PointState> StartingPosition = new[]
         {
-            new PointState(white: 5),
-            PointState.Empty,
-            PointState.Empty,
-            PointState.Empty,
-            new PointState(black: 3),
-            PointState.Empty,
-            new PointState(black: 5),
-            PointState.Empty,
-            PointState.Empty,
-            PointState.Empty,
-            PointState.Empty,
-            new PointState(white: 2),
-            new PointState(black: 2),
-            PointState.Empty,
-            PointState.Empty,
-            PointState.Empty,
-            PointState.Empty,
-            new PointState(white: 5),
-            PointState.Empty,
-            new PointState(white: 3),
-            PointState.Empty,
-            PointState.Empty,
-            PointState.Empty,
-            new PointState(black: 5),
+            new PointState(white: 5, black: 0),
+            Defaults.EmptyPoint,
+            Defaults.EmptyPoint,
+            Defaults.EmptyPoint,
+            new PointState(black: 3, white: 0),
+            Defaults.EmptyPoint,
+            new PointState(black: 5, white: 0),
+            Defaults.EmptyPoint,
+            Defaults.EmptyPoint,
+            Defaults.EmptyPoint,
+            Defaults.EmptyPoint,
+            new PointState(white: 2, black: 0),
+            new PointState(black: 2, white: 0),
+            Defaults.EmptyPoint,
+            Defaults.EmptyPoint,
+            Defaults.EmptyPoint,
+            Defaults.EmptyPoint,
+            new PointState(white: 5, black: 0),
+            Defaults.EmptyPoint,
+            new PointState(white: 3, black: 0),
+            Defaults.EmptyPoint,
+            Defaults.EmptyPoint,
+            Defaults.EmptyPoint,
+            new PointState(black: 5, white: 0),
         }.ToList().AsReadOnly();
 
         public static BackgammonState DefaultState(IDieRoller dieRoller) =>
@@ -101,40 +107,59 @@ namespace SignalRGammon.Backgammon
             {
                 DieRoller = dieRoller,
                 CurrentPlayer = null,
-                WhiteDiceRolls = Array.Empty<int>(),
-                BlackDiceRolls = Array.Empty<int>(),
+                DiceRolls = Defaults.EmptyDiceRolls,
                 Points = StartingPosition,
-                Fence = PointState.Empty,
+                Bar = Defaults.EmptyPoint,
+            };
+
+        public BackgammonState With(
+            Player? CurrentPlayer = null,
+            DiceState? DiceRolls = null,
+            IReadOnlyList<PointState>? Points = null,
+            PointState? Bar = null
+        ) =>
+            new BackgammonState
+            {
+                DieRoller = this.DieRoller,
+                CurrentPlayer = CurrentPlayer ?? this.CurrentPlayer,
+                DiceRolls = DiceRolls ?? this.DiceRolls,
+                Points = Points ?? this.Points,
+                Bar = Bar ?? this.Bar,
             };
 
         internal async Task<(BackgammonState, bool)> ApplyAction(BackgammonAction action)
         {
             await Task.Yield();
-            switch (CurrentPlayer)
+            switch (this)
             {
-                case null:
+                case { CurrentPlayer: null, DiceRolls: { White: { Count: 1 }, Black: { Count: 1 } } }:
                     return action switch
                     {
-                        BackgammonDiceRoll { Player: Player.White } when WhiteDiceRolls.Count == 0 && BlackDiceRolls.Count == 0 => (new BackgammonState(this) { WhiteDiceRolls = new[] { DieRoller.RollDie() } }, true),
-                        BackgammonDiceRoll { Player: Player.Black } when BlackDiceRolls.Count == 0 && WhiteDiceRolls.Count == 0 => (new BackgammonState(this) { BlackDiceRolls = new[] { DieRoller.RollDie() } }, true),
-                        BackgammonDiceRoll { Player: Player.White } when WhiteDiceRolls.Count == 0 => (DetermineStartingPlayer(new BackgammonState(this) { WhiteDiceRolls = new[] { DieRoller.RollDie() } }), true),
-                        BackgammonDiceRoll { Player: Player.Black } when BlackDiceRolls.Count == 0 => (DetermineStartingPlayer(new BackgammonState(this) { BlackDiceRolls = new[] { DieRoller.RollDie() } }), true),
+                        BackgammonSetStartingPlayer { Player: null } => (DefaultState(DieRoller), true),
+                        BackgammonSetStartingPlayer { Player: Player player } => (this.With(CurrentPlayer: player, DiceRolls: Defaults.EmptyDiceRolls.With(player, new[] { DiceRolls.White[0], DiceRolls.Black[0] })), true),
                         _ => (this, false)
                     };
-                default:
-                    return (this, false);
+                case { CurrentPlayer: null }:
+                    return action switch
+                    {
+                        BackgammonDiceRoll { Player: var player } when DiceRolls[player].Count == 0 => (this.With(DiceRolls: DiceRolls.With(player, new[] { DieRoller.RollDie() })), true),
+                        _ => (this, false)
+                    };
+                case { CurrentPlayer: Player currentPlayer }:
+                    return action switch
+                    {
+                        BackgammonDiceRoll { Player: var actingPlayer } when actingPlayer == currentPlayer && DiceRolls[currentPlayer].Count == 0 => (this.With(DiceRolls: Defaults.EmptyDiceRolls.With(currentPlayer, RollDiceWithDoubles())), true),
+                        _ => (this, false)
+                    };
             }
         }
 
-        private static BackgammonState DetermineStartingPlayer(BackgammonState backgammonState)
+        private IReadOnlyList<int> RollDiceWithDoubles()
         {
-            return (backgammonState.WhiteDiceRolls[0], backgammonState.BlackDiceRolls[0]) switch
+            return (DieRoller.RollDie(6), DieRoller.RollDie(6)) switch
             {
-                (var white, var black) when white > black => new BackgammonState(backgammonState) { CurrentPlayer = Player.White, WhiteDiceRolls = new[] { white, black }, BlackDiceRolls = Array.Empty<int>() },
-                (var white, var black) when white < black => new BackgammonState(backgammonState) { CurrentPlayer = Player.Black, BlackDiceRolls = new[] { black, white }, WhiteDiceRolls = Array.Empty<int>() },
-                
-                // equal
-                _ => DefaultState(backgammonState.DieRoller),
+                (int a, int b) when a == b => Enumerable.Repeat(a, 4).ToArray(),
+                (int a, int b) => new[] { a, b },
             };
         }
     }

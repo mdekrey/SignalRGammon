@@ -11,12 +11,12 @@ import { GameConnectionScope } from './services/gameConnectionContext';
 function App() {
   return (
     <GameConnectionScope>
-    <Layout>
-      <Route exact path='/' component={GameSelector} />
-      <Route path='/backgammon' component={BackgammonComponent} />
-      <Route path='/chat' component={ChatComponent} />
-      <Route path='/licenses' component={LicensesComponent} />
-    </Layout>
+      <Layout>
+        <Route exact path='/' component={GameSelector} />
+        <Route path='/backgammon' component={BackgammonComponent} />
+        <Route path='/chat' component={ChatComponent} />
+        <Route path='/licenses' component={LicensesComponent} />
+      </Layout>
     </GameConnectionScope>
   );
 }

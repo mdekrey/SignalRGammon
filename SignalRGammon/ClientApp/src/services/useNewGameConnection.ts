@@ -5,11 +5,11 @@ import { from, Observable } from "rxjs";
 
 export function useNewGameConnection() {
     const connection = useMemo(() => new HubConnectionBuilder().withUrl("/gameHub").build(), []);
-    const connected = useMemo(() => from(connection.start()), []);
+    const connected = useMemo(() => connection.start(), [connection]);
 
     useEffect(() => {
         return () => { connection.stop() };
-    }, []);
+    }, [connection]);
 
-    return [connection, connected] as [HubConnection, Observable<void>];
+    return [connection, connected] as [HubConnection, Promise<void>];
 }

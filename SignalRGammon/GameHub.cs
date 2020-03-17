@@ -39,34 +39,24 @@ namespace SignalRGammon
             return await game.Do(messageJson);
         }
 
-
         public ChannelReader<string?> ListenState(string gameId, CancellationToken cancellationToken)
         {
             var game = GetGame(gameId);
-            var channel = Channel.CreateUnbounded<string?>();
+            var observable = game?.JsonStates ?? Observable.Return<string?>(null);
 
-            // We don't want to await WriteItemsAsync, otherwise we'd end up waiting 
-            // for all the items to be written before returning the channel back to
-            // the client.
-            _ = WriteItemsAsync(channel.Writer, game, cancellationToken);
-
-            return channel.Reader;
+            return AsSignalRChannel(observable, cancellationToken);
         }
 
-        private async Task WriteItemsAsync(
-            ChannelWriter<string?> writer,
-            IGame? game,
-            CancellationToken cancellationToken)
+        private ChannelReader<T> AsSignalRChannel<T>(IObservable<T> observable, CancellationToken cancellationToken)
         {
-            if (game == null)
-            {
-                await writer.WriteAsync(null);
-                writer.Complete();
-                return;
-            }
-            game.States
-                .Do(next => writer.WriteAsync(next))
-                .Subscribe(_ => { }, ex => writer.Complete(ex), () => writer.Complete(),  cancellationToken);
+            var channel = Channel.CreateUnbounded<T>();
+
+            observable
+                .Select(next => Observable.FromAsync(() => channel.Writer.WriteAsync(next).AsTask()))
+                .Concat()
+                .Subscribe(_ => { }, ex => channel.Writer.Complete(ex), () => channel.Writer.Complete(), cancellationToken);
+
+            return channel.Reader;
         }
 
 
@@ -81,7 +71,7 @@ namespace SignalRGammon
 
         private IGame? GetGame(string gameId)
         {
-            return memoryCache.Get<IGame?>(gameId);
+            return gameId == null ? null : memoryCache.Get<IGame?>(gameId);
         }
 
     }

@@ -4,7 +4,7 @@ import { HubConnection } from "@microsoft/signalr";
 import { Observable } from "rxjs";
 import { useNewGameConnection } from "./useNewGameConnection";
 
-const GameConnectionContext = createContext([null!, null!] as [HubConnection, Observable<void>]);
+const GameConnectionContext = createContext([null!, null!] as [HubConnection, Promise<void>]);
 export function useGameConnection() {
     return useContext(GameConnectionContext);
 }

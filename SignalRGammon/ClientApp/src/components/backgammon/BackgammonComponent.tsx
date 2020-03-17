@@ -1,32 +1,24 @@
-import React, { useMemo, useState } from 'react';
-import { from } from 'rxjs';
-import { switchMap, tap } from 'rxjs/operators';
-import { fromSignalR } from '../../utils/fromSignalR';
-import { useRx } from '../../utils/useRx';
-import { useGameConnection } from '../../services/gameConnectionContext';
-import { BackgammonState } from './BackgammonState';
+import React from 'react';
+import { useRouteMatch, Switch, Route, RouteChildrenProps } from 'react-router-dom';
+import { PlayBackgammonComponent } from './PlayBackgammonComponent';
+import { NewGameComponent } from './NewGameComponent';
+import { BackgammonScope, BackgammonScopeProps } from './BackgammonService';
+import { Omit } from 'react-router';
 
 export function BackgammonComponent() {
-    const [gameId, setGameId] = useState<null | string>(null);
-    const [connection, connected] = useGameConnection();
-
-    const createGameAndListen = useMemo(() => connected
-        .pipe(
-            switchMap(() => from(connection.invoke<string>("CreateGame", "backgammon"))),
-            tap(setGameId),
-            switchMap(gameId => fromSignalR<BackgammonState>(connection.stream('ListenState', gameId)))
-        ), [connected]);
-    const gameState = useRx(createGameAndListen, null);
-    console.log(gameState);
+    const { path } = useRouteMatch();
 
     return (
-        <div>
-            <button onClick={onRoll} disabled={!gameId}>Roll</button>
-        </div>
-    );
-
-    function onRoll() {
-        connection.invoke<boolean>('Do', gameId, JSON.stringify({ type: 'roll', player: 'Black' }))
-            .then(v => console.log('was roll allowed:', v));
-    }
+        <Switch>
+            <Route exact path={path} component={NewGameComponent} />
+            <Route exact path={`${path}/:gameId/:playerColor`}>
+                {
+                    ({ match }: RouteChildrenProps<Omit<BackgammonScopeProps, "children">>) =>
+                        <BackgammonScope  {...match!.params}>
+                            <PlayBackgammonComponent />
+                        </BackgammonScope>
+                }
+            </Route>
+        </Switch>
+    )
 }

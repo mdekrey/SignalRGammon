@@ -9,7 +9,7 @@ namespace SignalRGammon
     {
         TimeSpan SlidingExpiration { get; }
 
-        IObservable<string> States { get; }
+        IObservable<string> JsonStates { get; }
 
         Task<bool> Do(string messageJson);
     }
@@ -19,11 +19,13 @@ namespace SignalRGammon
     {
         JsonSerializerSettings JsonSettings { get; }
 
-        IObservable<string> IGame.States => States.Select(s => JsonConvert.SerializeObject(s, JsonSettings));
+        IObservable<string> IGame.JsonStates =>
+
+            States.Select(s => JsonConvert.SerializeObject(new { s.state, s.action }, JsonSettings));
 
         Task<bool> IGame.Do(string messageJson) => Do(JsonConvert.DeserializeObject<TAction>(messageJson, JsonSettings));
 
-        new IObservable<TState> States { get; }
+        IObservable<(TState state, TAction action)> States { get; }
 
         Task<bool> Do(TAction action);
     }
