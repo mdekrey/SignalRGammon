@@ -26,6 +26,7 @@ export function BackgammonComponent() {
     );
 
     function onRoll() {
-        connection.send('Do', gameId, JSON.stringify({ type: 'roll', player: 'Black' }));
+        connection.invoke<boolean>('Do', gameId, JSON.stringify({ type: 'roll', player: 'Black' }))
+            .then(v => console.log('was roll allowed:', v));
     }
 }
