@@ -1,12 +1,13 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useRx } from '../../utils/useRx';
 import { useBackgammon } from './BackgammonService';
 import { Board } from './svg-parts/Board';
 import { Filters } from './svg-parts/Filters';
-import { boardWidth, boardHeight, checkerDiameter } from './svg-parts/sizes';
-import { Checker } from './svg-parts/Checker';
-import { PointPosition } from './svg-parts/Point';
-import { Link } from 'react-router-dom';
+import { boardWidth, boardHeight } from './svg-parts/sizes';
+import { pointTransform } from './svg-parts/Point';
+import { Dice } from './svg-parts/Dice';
+import { Checkers } from './svg-parts/Checkers';
 
 import "./PlayBackgammon.css";
 
@@ -34,28 +35,25 @@ export function PlayBackgammonComponent() {
 
     return (
         <div className="PlayBackgammon">
-            {/* {otherPlayerUrl} */}
             <svg style={{ width: 'calc(100vw - 20px)', height: 'calc(100vh - 20px)' }}
                 viewBox={`0 0 ${boardWidth} ${boardHeight}`}
                 preserveAspectRatio="xMidYMid meet">
                 <Filters />
                 <g transform={playerColor === 'white' ? `translate(${boardWidth},${boardHeight}) rotate(180)` : undefined}>
                     <Board />
-                    {gameState.state.currentPlayer && gameState.state.points.map(({ black, white }, idx) => {
-                        const { x, y, rotation } = PointPosition(idx);
-                        return <g transform={`translate(${x}, ${y}) rotate(${rotation})`} key={idx} className="selectable-container">
-                            {Array(black).fill(0).map((_, idx, arr) =>
-                                <g transform={`translate(0 ${(idx + 0.5) * checkerDiameter})`} key={idx}>
-                                    <Checker player="black" selectable={arr.length - 1 === idx} />
-                                </g>
-                            )}
-                            {Array(white).fill(0).map((_, idx, arr) =>
-                                <g transform={`translate(0 ${(idx + 0.5) * checkerDiameter})`} key={idx}>
-                                    <Checker player="white" selectable={arr.length - 1 === idx} />
-                                </g>
-                            )}
+                    {gameState.state.currentPlayer && gameState.state.points.map(({ black, white }, idx) =>
+                        <g transform={pointTransform(idx)} key={idx}>
+                            <Checkers count={black} player="black" selectable={playerColor === 'black' && !canRoll} />
+                            <Checkers count={white} player="white" selectable={playerColor === 'white' && !canRoll} />
+
                         </g>
-                    })}
+                    )}
+                    <g transform={`translate(${boardWidth / 4}, ${boardHeight / 2})`}>
+                        <Dice player="white" values={gameState.state.diceRolls.white} selectable={playerColor === 'white'} />
+                    </g>
+                    <g transform={`translate(${boardWidth * 3 / 4}, ${boardHeight / 2})`}>
+                        <Dice player="black" values={gameState.state.diceRolls.black} selectable={playerColor === 'black'} />
+                    </g>
                 </g>
             </svg>
             {isWaiting || canRoll

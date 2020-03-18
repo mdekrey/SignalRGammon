@@ -36,13 +36,13 @@ export function BackgammonScope({ gameId, playerColor, children }: BackgammonSco
     const roll = useCallback(async () => {
         await connected;
         return await connection.invoke<boolean>('Do', gameId, JSON.stringify({ type: 'roll', player: playerColor }))
-    }, [connection, playerColor, gameId])
+    }, [connected, connection, playerColor, gameId])
 
     const state = useMemo(() => from(connected)
         .pipe(
             switchMap(() => fromSignalR(connection.stream('ListenState', gameId))),
             map(json => JSON.parse(json))
-        ), [connection, connected]);
+        ), [connection, connected, gameId]);
     const value = useMemo(() => ({
         state,
         roll,

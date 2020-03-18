@@ -4,6 +4,10 @@ export const stroke = 2;
 export const checkerRadius = 50;
 export const checkerDiameter = 100;
 
+export const dieSize = 100;
+export const pipRadius = 10;
+export const pipPercentage = 0.3;
+export const dieSeparation = 170;
 
 export const barWidth = 0.75 * checkerDiameter;
 export const border = 0.375 * checkerDiameter;

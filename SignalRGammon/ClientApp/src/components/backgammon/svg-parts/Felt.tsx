@@ -1,5 +1,4 @@
 import React from 'react';
-import { checkerRadius, stroke } from './sizes';
 
 import "./styles.css";
 

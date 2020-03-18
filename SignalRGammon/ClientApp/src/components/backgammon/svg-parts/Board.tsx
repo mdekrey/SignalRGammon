@@ -2,15 +2,15 @@ import React from 'react';
 
 import "./styles.css";
 import { Felt } from './Felt';
-import { boardWidth, boardHeight, checkerDiameter, border, anchorLeft, anchorTop, anchorBottom, anchorRight } from './sizes';
-import { Point, PointPosition } from './Point';
+import { boardWidth, boardHeight, checkerDiameter, border, anchorTop, anchorBottom, anchorRight } from './sizes';
+import { Point, pointTransform } from './Point';
 
 export const Board = () =>
     <g mask="url(#boardMask)" >
         <Felt width={boardWidth} height={boardHeight} />
-        {Array(24).fill(0).map((_, idx) => PointPosition(idx)).map(({ x, y, rotation }, idx) =>
-            <g transform={`translate(${x}, ${y}) rotate(${rotation})`} key={idx}>
-                <Point color={idx % 2 == 0 ? 'white' : 'black'} />
+        {Array(24).fill(0).map((transform, idx) =>
+            <g transform={pointTransform(idx)} key={idx}>
+                <Point color={idx % 2 === 0 ? 'white' : 'black'} />
             </g>
         )}
 

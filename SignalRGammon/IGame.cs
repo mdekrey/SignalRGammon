@@ -21,7 +21,8 @@ namespace SignalRGammon
 
         IObservable<string> IGame.JsonStates =>
 
-            States.Select(s => JsonConvert.SerializeObject(new { s.state, s.action }, JsonSettings));
+            States
+                .Select(s => JsonConvert.SerializeObject(new { s.state, s.action }, JsonSettings));
 
         Task<bool> IGame.Do(string messageJson) => Do(JsonConvert.DeserializeObject<TAction>(messageJson, JsonSettings));
 

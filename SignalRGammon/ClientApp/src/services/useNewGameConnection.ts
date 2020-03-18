@@ -1,6 +1,5 @@
 import { useMemo, useEffect } from "react";
 import { HubConnectionBuilder, HubConnection } from "@microsoft/signalr";
-import { from, Observable } from "rxjs";
 
 
 export function useNewGameConnection() {

@@ -3,7 +3,7 @@
     stroke: rgba(0,0,0, 0.87);
 }
 
-.selectable-container:hover .checker.selectable :first-child {
+.selectable-container:hover .checker.selectable :first-child, .checker.selected :first-child {
     filter: url(#selectionGlow);
 }
 
@@ -38,4 +38,33 @@
 }
 .point.black {
     fill: #351e10;
+}
+
+
+.die {
+    stroke: rgba(0,0,0, 0.87);
+}
+
+.die.selectable:hover :first-child {
+    filter: url(#selectionGlow);
+}
+
+.die rect {
+    filter: url(#dropshadow);
+}
+
+.die.white {
+    fill: wheat;
+}
+
+.die.white .pip {
+    fill: #251203;
+}
+
+.die.black {
+    fill: #251203;
+}
+
+.die.black .pip {
+    fill: wheat;
 }

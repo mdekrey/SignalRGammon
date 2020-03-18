@@ -15,6 +15,7 @@
 
 .PlayBackgammon .overlay .child {
     grid-area: child;
+    text-align: center;
 }
 
 .PlayBackgammon .roll-button-container button {

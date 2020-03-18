@@ -16,7 +16,7 @@ namespace SignalRGammon.Backgammon
         {
             Converters =
             {
-                new StringEnumConverter(camelCaseText: true),
+                new StringEnumConverter(new CamelCaseNamingStrategy(), allowIntegerValues: false),
             },
             ContractResolver = new DefaultContractResolver
             {
@@ -29,8 +29,9 @@ namespace SignalRGammon.Backgammon
         public BackgammonGame(IDieRoller dieRoller)
         {
             state = new BehaviorSubject<(BackgammonState state, BackgammonAction? action)>((BackgammonState.DefaultState(dieRoller), null));
+            States = state.Replay(1).RefCount();
 
-            state.Select(s => s.state).Select(s => Observable.FromAsync(() => CheckAutomaticActions(s))).Concat().Subscribe();
+            States.Select(s => s.state).Select(s => Observable.FromAsync(() => CheckAutomaticActions(s))).Concat().Subscribe();
         }
 
         private async Task CheckAutomaticActions(BackgammonState obj)
@@ -50,7 +51,7 @@ namespace SignalRGammon.Backgammon
 
         public JsonSerializerSettings JsonSettings => BackgammonJsonSettings;
 
-        public IObservable<(BackgammonState state, BackgammonAction? action)> States => state.AsObservable();
+        public IObservable<(BackgammonState state, BackgammonAction? action)> States { get; }
 
         public TimeSpan SlidingExpiration => TimeSpan.FromHours(1);
 

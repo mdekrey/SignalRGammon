@@ -52,7 +52,8 @@ namespace SignalRGammon
             var channel = Channel.CreateUnbounded<T>();
 
             observable
-                .Select(next => Observable.FromAsync(() => channel.Writer.WriteAsync(next).AsTask()))
+                .Aggregate(Task.CompletedTask, (prevTask, next) => prevTask.ContinueWith(t => channel.Writer.WriteAsync(next).AsTask()).Unwrap())
+                .Select(next => Observable.FromAsync(() => next))
                 .Concat()
                 .Subscribe(_ => { }, ex => channel.Writer.Complete(ex), () => channel.Writer.Complete(), cancellationToken);
 

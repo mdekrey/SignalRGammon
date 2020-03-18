@@ -1,9 +1,9 @@
 import React from 'react';
-import { checkerRadius, stroke, pointBasePct, boardHeight, pointHeightPct, checkerDiameter, anchorRight, anchorBottom, anchorLeft, anchorTop } from './sizes';
+import { checkerRadius, pointBasePct, boardHeight, pointHeightPct, checkerDiameter, anchorRight, anchorBottom, anchorLeft, anchorTop } from './sizes';
 
 import "./styles.css";
 
-export const PointPosition = (index: number) => {
+const pointPosition = (index: number) => {
     if (index < 6) {
         return { x: anchorRight - checkerDiameter * (0.5 + index), y: anchorBottom, rotation: 180 };
     } else if (index < 12) {
@@ -14,6 +14,11 @@ export const PointPosition = (index: number) => {
         return { x: anchorRight - checkerDiameter * (0.5 + 23 - index), y: anchorTop, rotation: 0 };
     }
     throw new Error("Invalid index " + index);
+}
+
+export const pointTransform = (index: number) => {
+    const { x, y, rotation } = pointPosition(index);
+    return `translate(${x}, ${y}) rotate(${rotation})`;
 }
 
 export const Point = ({ color }: { color: 'white' | 'black' }) =>
