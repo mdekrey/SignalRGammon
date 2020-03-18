@@ -7,7 +7,7 @@ export const checkerDiameter = 100;
 export const dieSize = 100;
 export const pipRadius = 10;
 export const pipPercentage = 0.3;
-export const dieSeparation = 170;
+export const dieSeparation = 150;
 
 export const barWidth = 0.75 * checkerDiameter;
 export const border = 0.375 * checkerDiameter;
@@ -23,3 +23,6 @@ export const anchorTop = border;
 export const anchorBottom = boardHeight - border;
 export const anchorLeft = border * 2 + checkerDiameter;
 export const anchorRight = boardWidth - (border * 2 + checkerDiameter);
+
+export const whiteDicePosition = `translate(${(anchorRight - anchorLeft) / 4 + anchorLeft - border / 2}, ${boardHeight / 2}) rotate(20)`;
+export const blackDicePosition = `translate(${(anchorRight - anchorLeft) * 3 / 4 + anchorLeft + border / 2}, ${boardHeight / 2}) rotate(-20)`;
