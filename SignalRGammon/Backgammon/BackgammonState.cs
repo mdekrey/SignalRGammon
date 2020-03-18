@@ -76,18 +76,6 @@ namespace SignalRGammon.Backgammon
 
         private static IReadOnlyList<PointState> StartingPosition = new[]
         {
-            new PointState(white: 5, black: 0),
-            Defaults.EmptyPoint,
-            Defaults.EmptyPoint,
-            Defaults.EmptyPoint,
-            new PointState(black: 3, white: 0),
-            Defaults.EmptyPoint,
-            new PointState(black: 5, white: 0),
-            Defaults.EmptyPoint,
-            Defaults.EmptyPoint,
-            Defaults.EmptyPoint,
-            Defaults.EmptyPoint,
-            new PointState(white: 2, black: 0),
             new PointState(black: 2, white: 0),
             Defaults.EmptyPoint,
             Defaults.EmptyPoint,
@@ -100,6 +88,18 @@ namespace SignalRGammon.Backgammon
             Defaults.EmptyPoint,
             Defaults.EmptyPoint,
             new PointState(black: 5, white: 0),
+            new PointState(white: 5, black: 0),
+            Defaults.EmptyPoint,
+            Defaults.EmptyPoint,
+            Defaults.EmptyPoint,
+            new PointState(black: 3, white: 0),
+            Defaults.EmptyPoint,
+            new PointState(black: 5, white: 0),
+            Defaults.EmptyPoint,
+            Defaults.EmptyPoint,
+            Defaults.EmptyPoint,
+            Defaults.EmptyPoint,
+            new PointState(white: 2, black: 0),
         }.ToList().AsReadOnly();
 
         public static BackgammonState DefaultState(IDieRoller dieRoller) =>

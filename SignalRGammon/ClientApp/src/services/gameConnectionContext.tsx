@@ -1,18 +1,32 @@
 
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, useMemo } from "react";
 import { HubConnection } from "@microsoft/signalr";
-import { Observable } from "rxjs";
 import { useNewGameConnection } from "./useNewGameConnection";
 
-const GameConnectionContext = createContext([null!, null!] as [HubConnection, Promise<void>]);
+export type GameConnectionContextType = {
+    connection: HubConnection;
+    connected: Promise<void>;
+    createGame: (gameType: string) => Promise<string>;
+}
+
+const GameConnectionContext = createContext({} as GameConnectionContextType);
 export function useGameConnection() {
     return useContext(GameConnectionContext);
 }
 
 export function GameConnectionScope(props: { children: React.ReactNode }) {
-    const connection = useNewGameConnection();
+    const [connection, connected] = useNewGameConnection();
+    const context = useMemo((): GameConnectionContextType => ({
+        connection,
+        connected,
+        createGame: async gameType => {
+            await connected;
+            return await connection.invoke<string>("CreateGame", gameType);
+        }
+    }), [connection, connected]);
+
     return (
-        <GameConnectionContext.Provider value={connection}>
+        <GameConnectionContext.Provider value={context}>
             {props.children}
         </GameConnectionContext.Provider>
     )

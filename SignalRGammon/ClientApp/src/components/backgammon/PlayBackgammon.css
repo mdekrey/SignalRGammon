@@ -1,0 +1,22 @@
+.PlayBackgammon {
+    position: relative;
+}
+
+.PlayBackgammon .overlay {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-rows: 1fr auto 1fr;
+    display: grid;
+    grid-template-areas: ". . ." ". child ." ". . .";
+}
+
+.PlayBackgammon .overlay .child {
+    grid-area: child;
+}
+
+.PlayBackgammon .roll-button-container button {
+    font-size: 2rem;
+}

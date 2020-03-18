@@ -1,7 +1,9 @@
 export interface BackgammonState {
-    currentPlayer: 'White' | 'Black';
-    whiteDiceRolls: number[];
-    blackDiceRolls: number[];
+    currentPlayer: 'white' | 'black';
+    diceRolls: {
+        white: number[];
+        black: number[];
+    }
     points: {
         white: number;
         black: number;

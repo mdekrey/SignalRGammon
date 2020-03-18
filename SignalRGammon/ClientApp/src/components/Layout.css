@@ -1,0 +1,14 @@
+.Layout {
+    padding: 10px;
+    box-sizing: border-box;
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-rows: 1fr auto 2fr;
+    grid-template-areas: ". . ." ". child ." ". . .";
+}
+
+.Layout-Child {
+    grid-area: child;
+}

@@ -16,7 +16,7 @@ namespace SignalRGammon.Backgammon
         {
             Converters =
             {
-                new StringEnumConverter(),
+                new StringEnumConverter(camelCaseText: true),
             },
             ContractResolver = new DefaultContractResolver
             {

@@ -1,0 +1,41 @@
+
+.checker {
+    stroke: rgba(0,0,0, 0.87);
+}
+
+.selectable-container:hover .checker.selectable :first-child {
+    filter: url(#selectionGlow);
+}
+
+.checker * {
+    filter: url(#dropshadow);
+}
+
+.checker.white {
+    fill: wheat;
+}
+
+.checker.black {
+    fill: #251203;
+}
+
+.felt rect:first-child {
+    fill: #004000;
+}
+
+.felt rect:nth-child(2) {
+    filter: url(#noise);
+    opacity: 0.1;
+}
+
+.walls {
+    fill: #48260d;
+    filter: url(#dropshadow);
+}
+
+.point.white {
+    fill: #997950
+}
+.point.black {
+    fill: #351e10;
+}

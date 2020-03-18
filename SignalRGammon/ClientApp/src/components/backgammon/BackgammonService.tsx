@@ -1,15 +1,20 @@
 import React, { useContext, createContext, useMemo, useCallback } from "react";
 import { Observable, from } from "rxjs";
-import { switchMap } from "rxjs/operators";
+import { switchMap, map } from "rxjs/operators";
 import { useGameConnection } from "../../services/gameConnectionContext";
 import { fromSignalR } from "../../utils/fromSignalR";
 import { BackgammonState } from "./BackgammonState";
 import { useRouteMatch } from "react-router";
 
+export type BackgammonAction = {
+    // TODO
+};
+
 export type BackgammonContextResult = {
-    state: Observable<BackgammonState>
+    state: Observable<{ state: BackgammonState, action: BackgammonAction } | null>
     roll: () => Promise<boolean>
     otherPlayerUrl: string
+    playerColor: "white" | "black";
 };
 
 const BackgammonContext = createContext({} as BackgammonContextResult);
@@ -24,7 +29,7 @@ export type BackgammonScopeProps = {
 }
 function otherPlayer(playerColor: "white" | "black") { return playerColor === 'white' ? 'black' : 'white'; }
 export function BackgammonScope({ gameId, playerColor, children }: BackgammonScopeProps) {
-    const [connection, connected] = useGameConnection();
+    const {connection, connected} = useGameConnection();
     const { url } = useRouteMatch();
     const otherPlayerUrl = window.location.href.replace(url, url.replace(playerColor, otherPlayer(playerColor)));
 
@@ -35,13 +40,15 @@ export function BackgammonScope({ gameId, playerColor, children }: BackgammonSco
 
     const state = useMemo(() => from(connected)
         .pipe(
-            switchMap(() => fromSignalR<BackgammonState>(connection.stream('ListenState', gameId)))
+            switchMap(() => fromSignalR(connection.stream('ListenState', gameId))),
+            map(json => JSON.parse(json))
         ), [connection, connected]);
     const value = useMemo(() => ({
         state,
         roll,
         otherPlayerUrl,
-    }), [state, roll, otherPlayerUrl]);
+        playerColor,
+    }), [state, roll, otherPlayerUrl, playerColor]);
 
     return (
         <BackgammonContext.Provider value={value}>
