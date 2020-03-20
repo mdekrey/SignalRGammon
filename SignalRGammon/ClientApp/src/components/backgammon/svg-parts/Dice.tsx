@@ -4,7 +4,14 @@ import { dieSeparation } from './sizes';
 import "./styles.css";
 import { Die } from './Die';
 
-export const Dice = ({ player, values, selectable = false, onSelect }: { player: 'white' | 'black', values: (number | null)[], selectable?: boolean, onSelect?: (value: number, index: number) => void }) => {
+export type DiceProps = {
+    player: 'white' | 'black';
+    values: (number | null)[];
+    selectable?: boolean;
+    onSelect?: (value: number, index: number) => void;
+};
+
+export const Dice = ({ player, values, selectable = false, onSelect }: DiceProps) => {
     return <>
         {values.map((value, index) =>
             value

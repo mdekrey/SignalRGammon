@@ -8,7 +8,7 @@ export interface BackgammonState {
         white: number;
         black: number;
     }[];
-    fence: {
+    bar: {
         white: number;
         black: number;
     };

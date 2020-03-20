@@ -13,6 +13,7 @@ export type BackgammonAction = {
 export type BackgammonContextResult = {
     state: Observable<{ state: BackgammonState, action: BackgammonAction } | null>
     roll: () => Promise<boolean>
+    move: (dieValue: number, startingPointIndex: number) => Promise<boolean>
     otherPlayerUrl: string
     playerColor: "white" | "black";
 };
@@ -35,7 +36,12 @@ export function BackgammonScope({ gameId, playerColor, children }: BackgammonSco
 
     const roll = useCallback(async () => {
         await connected;
-        return await connection.invoke<boolean>('Do', gameId, JSON.stringify({ type: 'roll', player: playerColor }))
+        return await connection.invoke<boolean>('Do', gameId, JSON.stringify({ type: 'roll', player: playerColor }));
+    }, [connected, connection, playerColor, gameId])
+
+    const move = useCallback(async (dieValue: number, startingPointIndex: number) => {
+        await connected;
+        return await connection.invoke<boolean>('Do', gameId, JSON.stringify({ type: 'move', player: playerColor, dieValue, startingPointNumber: startingPointIndex }));
     }, [connected, connection, playerColor, gameId])
 
     const state = useMemo(() => from(connected)
@@ -46,6 +52,7 @@ export function BackgammonScope({ gameId, playerColor, children }: BackgammonSco
     const value = useMemo(() => ({
         state,
         roll,
+        move,
         otherPlayerUrl,
         playerColor,
     }), [state, roll, otherPlayerUrl, playerColor]);

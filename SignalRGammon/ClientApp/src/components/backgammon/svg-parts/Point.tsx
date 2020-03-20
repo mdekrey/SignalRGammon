@@ -21,7 +21,17 @@ export const pointTransform = (index: number) => {
     return `translate(${x}, ${y}) rotate(${rotation})`;
 }
 
-export const Point = ({ color }: { color: 'white' | 'black' }) =>
-    <g className={`point ${color}`}>
+export type PointProps = {
+    color: 'white' | 'black' | 'transparent';
+    selectable?: boolean;
+    selected?: boolean;
+    onClick?: () => void;
+}
+
+export const Point = ({ color, selectable = false, selected = false, onClick }: PointProps) =>
+    <g className={`point ${color} ${selectable ? 'selectable' : ''} ${selected ? 'selected' : ''}`} onClick={onClick}>
         <path d={`M${-checkerRadius * pointBasePct},0 L${checkerRadius * pointBasePct},0 L0,${boardHeight * pointHeightPct}z`} className={`point ${color}`} />
+        {selectable
+            ? <rect x={-checkerRadius} width={checkerDiameter} height={(anchorBottom - anchorTop) / 2} fill="transparent" className="hitbox" />
+            : null}
     </g>;

@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,6 +14,14 @@ namespace SignalRGammon.Backgammon
     {
         White,
         Black,
+    }
+
+    public static class PlayerExtensions
+    {
+        public static Player OtherPlayer(this Player p)
+        {
+            return p == Player.White ? Player.Black : Player.White;
+        }
     }
 
     public readonly struct PlayerState<T>
@@ -149,9 +158,84 @@ namespace SignalRGammon.Backgammon
                     return action switch
                     {
                         BackgammonDiceRoll { Player: var actingPlayer } when actingPlayer == currentPlayer && DiceRolls[currentPlayer].Count == 0 => (this.With(DiceRolls: Defaults.EmptyDiceRolls.With(currentPlayer, RollDiceWithDoubles())), true),
+                        BackgammonMove { Player: var actingPlayer, DieValue: var dieValue, StartingPointNumber: var startingPoint } when actingPlayer == currentPlayer && DiceRolls[currentPlayer].Contains(dieValue) => 
+                            HandleMove(dieValue, startingPoint),
+                        //BackgammonBearOff { Player: var actingPlayer, DieValue: var dieValue, StartingPointNumber: var startingPoint } when actingPlayer == currentPlayer && DiceRolls[currentPlayer].Contains(dieValue) =>
+                        //    HandleBearOff(dieValue, startingPoint),
                         _ => (this, false)
                     };
             }
+        }
+
+        private (BackgammonState, bool) HandleMove(int dieValue, int startingPoint)
+        {
+            if (!CurrentPlayer.HasValue)
+                // Can only make a move on a player's turn
+                return (this, false);
+
+            var player = CurrentPlayer.Value;
+            var otherPlayer = player.OtherPlayer();
+            if (startingPoint != -1 && Bar[player] != 0)
+                // Any time a player has one or more checkers on the bar, his first obligation is to enter those checker(s) into the opposing home board.
+                return (this, false);
+            if (startingPoint == -1 && Bar[player] <= 0)
+                // Player has nothing on the bar, but is trying to move off the bar
+                return (this, false);
+
+            var actualEndPoint = GetEndPoint(player, startingPoint, dieValue);
+
+            if (IsAnchor(actualEndPoint, otherPlayer))
+            {
+                // tried to move onto the other players' anchor
+                return (this, false);
+            }
+
+            var points = Points.ToImmutableList();
+
+            var bar = Points[actualEndPoint][otherPlayer] == 1
+                ? Bar.With(otherPlayer, Bar[otherPlayer] + 1) // hit a blot
+                : Bar;
+
+            points = points.SetItem(actualEndPoint, new PointState(player, Points[actualEndPoint][player] + 1, 0));
+
+            if (startingPoint < 0)
+            {
+                bar = bar.With(player, bar[player] - 1);
+            }
+            else
+            {
+                points = points.SetItem(startingPoint, new PointState(player, Points[startingPoint][player] - 1, 0));
+            }
+
+            var resultDice = DiceRolls[player].ToList();
+            resultDice.RemoveAt(resultDice.IndexOf(dieValue));
+            return (
+                this.With(
+                    CurrentPlayer: resultDice.Count == 0 ? otherPlayer : player,
+                    DiceRolls: DiceRolls.With(player, resultDice.AsReadOnly()),
+                    Points: points,
+                    Bar: bar
+                ),
+                true
+            );
+        }
+
+        public int GetEndPoint(Player player, int startingPoint, int dieValue)
+        {
+
+            var effectiveStartPoint =
+                startingPoint == -1 ? -1
+                : player == Player.White ? 23 - startingPoint
+                : startingPoint;
+            var effectiveEndPoint = effectiveStartPoint + dieValue;
+            var actualEndPoint = player == Player.White ? 23 - effectiveEndPoint
+                : effectiveEndPoint;
+            return actualEndPoint;
+        }
+
+        public bool IsAnchor(int actualEndPoint, Player player)
+        {
+            return Points[actualEndPoint][player] > 1;
         }
 
         private IReadOnlyList<int> RollDiceWithDoubles()
@@ -163,4 +247,5 @@ namespace SignalRGammon.Backgammon
             };
         }
     }
+
 }

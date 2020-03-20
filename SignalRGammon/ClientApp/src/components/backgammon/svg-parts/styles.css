@@ -7,7 +7,7 @@
     filter: url(#selectionGlow);
 }
 
-.checker * {
+.checker :not(.hitbox) {
     filter: url(#dropshadow);
 }
 
@@ -38,6 +38,14 @@
 }
 .point.black {
     fill: #351e10;
+}
+.point.transparent {
+    fill: transparent;
+}
+.point.selectable:hover :not(.hitbox), .point.selected :not(.hitbox) {
+    stroke: rgb(255,186,0);
+    stroke-width: 1px;
+    filter: url(#selectionGlow);
 }
 
 
