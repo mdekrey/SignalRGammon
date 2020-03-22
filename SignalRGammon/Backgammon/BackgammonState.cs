@@ -164,6 +164,8 @@ namespace SignalRGammon.Backgammon
                             HandleMove(dieValue, startingPoint),
                         BackgammonBearOff { Player: var actingPlayer, DieValue: var dieValue, StartingPointNumber: var startingPoint } when actingPlayer == currentPlayer && DiceRolls[currentPlayer].Contains(dieValue) =>
                             HandleBearOff(dieValue, startingPoint),
+                        BackgammonCannotUseRoll { DieValue: var dieValue } =>
+                            RevokeDieRoll(dieValue),
                         _ => (this, false)
                     };
             }
@@ -225,7 +227,7 @@ namespace SignalRGammon.Backgammon
         private (BackgammonState, bool) HandleBearOff(int dieValue, int startingPoint)
         {
             if (!CurrentPlayer.HasValue)
-                // Can only make a move on a player's turn
+                // Can only bear off on a player's turn
                 return (this, false);
 
             var target = this;
@@ -251,6 +253,23 @@ namespace SignalRGammon.Backgammon
                     CurrentPlayer: resultDice.Count == 0 ? player.OtherPlayer() : player,
                     DiceRolls: DiceRolls.With(player, resultDice.AsReadOnly()),
                     Points: points
+                ),
+                true
+            );
+        }
+
+        private (BackgammonState, bool) RevokeDieRoll(int dieValue)
+        {
+            if (!CurrentPlayer.HasValue)
+                // Can only revoke a roll on a player's turn
+                return (this, false);
+
+            var player = CurrentPlayer.Value;
+            var resultDice = DiceRolls[player].ToList();
+            resultDice.RemoveAt(resultDice.IndexOf(dieValue));
+            return (
+                this.With(
+                    DiceRolls: DiceRolls.With(player, resultDice.AsReadOnly())
                 ),
                 true
             );
