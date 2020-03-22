@@ -31,17 +31,7 @@ namespace SignalRGammon.Backgammon
             state = new BehaviorSubject<(BackgammonState state, BackgammonAction? action)>((BackgammonState.DefaultState(dieRoller), null));
             States = state.Replay(1).RefCount();
 
-            States.Select(s => s.state).Select(s => Observable.FromAsync(() => CheckAutomaticActions(s))).Concat().Subscribe();
-        }
-
-        private async Task CheckAutomaticActions(BackgammonState obj)
-        {
-            switch (obj)
-            {
-                case { CurrentPlayer: null, DiceRolls: { White: { Count: 1 }, Black: { Count: 1 } } }:
-                    await Do(new BackgammonSetStartingPlayer());
-                    break;
-            }
+            States.Select(s => s.state).Select(s => Observable.FromAsync(() => Rules.CheckAutomaticActions(s, Do))).Concat().Subscribe();
         }
 
         public JsonSerializerSettings JsonSettings => BackgammonJsonSettings;

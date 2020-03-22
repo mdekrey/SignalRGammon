@@ -13,6 +13,16 @@ namespace SignalRGammon.Backgammon
 
     public static class Rules
     {
+        public static async Task CheckAutomaticActions(BackgammonState obj, Func<BackgammonAction, Task<bool>> Do)
+        {
+            switch (obj)
+            {
+                case { CurrentPlayer: null, DiceRolls: { White: { Count: 1 }, Black: { Count: 1 } } }:
+                    await Do(new BackgammonSetStartingPlayer());
+                    break;
+            }
+        }
+
         public static async Task<(BackgammonState, bool)> ApplyAction(this BackgammonState state, BackgammonAction action)
         {
             await Task.Yield();
