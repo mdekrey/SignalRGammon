@@ -76,3 +76,13 @@
 .die.black .pip {
     fill: wheat;
 }
+
+
+.home {
+    fill: transparent;
+}
+.home.selectable:hover *, .home.selected * {
+    stroke: rgb(255,186,0);
+    stroke-width: 1px;
+    filter: url(#selectionGlow);
+}

@@ -10,6 +10,10 @@ import { Dice } from './svg-parts/Dice';
 import { Checkers } from './svg-parts/Checkers';
 
 import "./PlayBackgammon.css";
+import { HomeArea } from './svg-parts/HomeArea';
+
+const barValue = -1;
+const homeValue = 24;
 
 const direction = {
     'black': 1,
@@ -21,12 +25,30 @@ const barEffectiveValue = {
     'white': 24,
 }
 
+const homeEffectiveValue = {
+    'black': 24,
+    'white': -1,
+}
+
+const isHomeEffectiveValue = {
+    'black': (v: number) => v >= 24,
+    'white': (v: number) => v < 0,
+}
+
 function normalizeGutter(startingPoint: number, playerColor: 'white' | 'black') {
-    return (startingPoint === -1 ? barEffectiveValue[playerColor] : startingPoint);
+    return (startingPoint === barValue ? barEffectiveValue[playerColor] : startingPoint);
+}
+
+function normalizeBearOff(endPoint: number, playerColor: 'white' | 'black') {
+    return isHomeEffectiveValue[playerColor](endPoint) ? homeValue : endPoint;
+}
+
+function contains(array: number[], value: number) {
+    return array.indexOf(value) !== -1;
 }
 
 export function PlayBackgammonComponent() {
-    const { state, roll, move, otherPlayerUrl, playerColor } = useBackgammon();
+    const { state, roll, move, bearOff, otherPlayerUrl, playerColor } = useBackgammon();
     const [selectedChecker, setSelectedChecker] = useState(null as (number | null));
 
     const gameState = useRx(state, undefined);
@@ -50,7 +72,7 @@ export function PlayBackgammonComponent() {
 
     const allowedPoints = selectedChecker === null
         ? []
-        : gameState.state.diceRolls[playerColor].map(die => normalizeGutter(selectedChecker, playerColor) + die * direction[playerColor]);
+        : gameState.state.diceRolls[playerColor].map(die => normalizeBearOff(normalizeGutter(selectedChecker, playerColor) + die * direction[playerColor], playerColor));
 
     return (
         <div className="PlayBackgammon">
@@ -60,6 +82,7 @@ export function PlayBackgammonComponent() {
                 <Filters />
                 <g transform={playerColor === 'white' ? `translate(${boardWidth},${boardHeight}) rotate(180)` : undefined}>
                     <Board />
+                    <HomeArea selectable={contains(allowedPoints, homeValue)} onClick={doBearOff} />
                     {gameState.state.currentPlayer && gameState.state.points.map(({ black, white }, idx) =>
                         <g transform={pointTransform(idx)} key={idx}>
                             <Checkers count={black} player="black" selectable={selectedChecker === null && playerColor === 'black' && !canRoll} selected={selectedChecker === idx}
@@ -67,18 +90,18 @@ export function PlayBackgammonComponent() {
                             <Checkers count={white} player="white" selectable={selectedChecker === null && playerColor === 'white' && !canRoll} selected={selectedChecker === idx}
                                 onClick={(selectedChecker === null && playerColor === 'white' && !canRoll && white) ? (() => setSelectedChecker(idx)) : undefined} />
                             {selectedChecker !== null
-                                ? <Point color="transparent" selectable={allowedPoints.indexOf(idx) !== -1} onClick={() => selectPoint(idx)} />
+                                ? <Point color="transparent" selectable={contains(allowedPoints, idx)} onClick={() => selectPoint(idx)} />
                                 : null
                             }
                         </g>
                     )}
                     <g transform={`translate(${boardWidth / 2}, ${boardHeight / 2}) rotate(180)`}>
-                        <Checkers count={gameState.state.bar.black} player="black" selectable={selectedChecker === null && playerColor === 'black' && !canRoll} selected={playerColor === 'black' && selectedChecker === -1}
-                                onClick={(selectedChecker === null && playerColor === 'black' && !canRoll && gameState.state.bar.black) ? (() => setSelectedChecker(-1)) : undefined} />
+                        <Checkers count={gameState.state.bar.black} player="black" selectable={selectedChecker === null && playerColor === 'black' && !canRoll} selected={playerColor === 'black' && selectedChecker === barValue}
+                                onClick={(selectedChecker === null && playerColor === 'black' && !canRoll && gameState.state.bar.black) ? (() => setSelectedChecker(barValue)) : (() => setSelectedChecker(null))} />
                     </g>
                     <g transform={`translate(${boardWidth / 2}, ${boardHeight / 2})`}>
-                        <Checkers count={gameState.state.bar.white} player="white" selectable={selectedChecker === null && playerColor === 'white' && !canRoll} selected={playerColor === 'white' && selectedChecker === -1}
-                                onClick={(selectedChecker === null && playerColor === 'white' && !canRoll && gameState.state.bar.white) ? (() => setSelectedChecker(-1)) : undefined} />
+                        <Checkers count={gameState.state.bar.white} player="white" selectable={selectedChecker === null && playerColor === 'white' && !canRoll} selected={playerColor === 'white' && selectedChecker === barValue}
+                                onClick={(selectedChecker === null && playerColor === 'white' && !canRoll && gameState.state.bar.white) ? (() => setSelectedChecker(barValue)) : (() => setSelectedChecker(null))} />
                     </g>
 
                     <g transform={`translate(${boardWidth / 4}, ${boardHeight / 2})`}>
@@ -114,5 +137,20 @@ export function PlayBackgammonComponent() {
         const dieValue = (index - normalizeGutter(selectedChecker, playerColor)) * direction[playerColor];
         setSelectedChecker(null);
         await move(dieValue, selectedChecker);
+    }
+
+    async function doBearOff() {
+        if (selectedChecker === null || !gameState) {
+            return;
+        }
+        const minDieValue = (homeEffectiveValue[playerColor] - normalizeGutter(selectedChecker, playerColor)) * direction[playerColor];
+        const rolls = gameState.state.diceRolls[playerColor].filter(roll => roll >= minDieValue).sort();
+        console.log(rolls, minDieValue);
+        const dieValue = rolls[0];
+        setSelectedChecker(null);
+        if (!dieValue) {
+            return;
+        }
+        await bearOff(dieValue, selectedChecker);
     }
 }

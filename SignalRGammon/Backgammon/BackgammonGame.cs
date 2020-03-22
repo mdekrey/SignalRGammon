@@ -38,13 +38,8 @@ namespace SignalRGammon.Backgammon
         {
             switch (obj)
             {
-                case { CurrentPlayer: null, DiceRolls: { White: var white, Black: var black } } when white.Count == 1 && black.Count == 1:
-                    await Do(new BackgammonSetStartingPlayer 
-                    { 
-                        Player = white[0] > black[0] ? Player.White
-                                : white[0] < black[0] ? Player.Black
-                                : (Player?)null
-                    });
+                case { CurrentPlayer: null, DiceRolls: { White: { Count: 1 }, Black: { Count: 1 } } }:
+                    await Do(new BackgammonSetStartingPlayer());
                     break;
             }
         }

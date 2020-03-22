@@ -142,11 +142,13 @@ namespace SignalRGammon.Backgammon
             switch (this)
             {
                 case { CurrentPlayer: null, DiceRolls: { White: { Count: 1 }, Black: { Count: 1 } } }:
-                    return action switch
+                    if (!(action is BackgammonSetStartingPlayer))
+                        return (this, false);
+                    return (DiceRolls.White[0], DiceRolls.Black[0]) switch
                     {
-                        BackgammonSetStartingPlayer { Player: null } => (DefaultState(DieRoller), true),
-                        BackgammonSetStartingPlayer { Player: Player player } => (this.With(CurrentPlayer: player, DiceRolls: Defaults.EmptyDiceRolls.With(player, new[] { DiceRolls.White[0], DiceRolls.Black[0] })), true),
-                        _ => (this, false)
+                        (int white, int black) when white < black => (this.With(CurrentPlayer: Player.Black, DiceRolls: Defaults.EmptyDiceRolls.With(Player.Black, new[] { black, white })), true),
+                        (int white, int black) when white > black => (this.With(CurrentPlayer: Player.White, DiceRolls: Defaults.EmptyDiceRolls.With(Player.White, new[] { white, black })), true),
+                        _ => (DefaultState(DieRoller), true),
                     };
                 case { CurrentPlayer: null }:
                     return action switch
@@ -160,8 +162,8 @@ namespace SignalRGammon.Backgammon
                         BackgammonDiceRoll { Player: var actingPlayer } when actingPlayer == currentPlayer && DiceRolls[currentPlayer].Count == 0 => (this.With(DiceRolls: Defaults.EmptyDiceRolls.With(currentPlayer, RollDiceWithDoubles())), true),
                         BackgammonMove { Player: var actingPlayer, DieValue: var dieValue, StartingPointNumber: var startingPoint } when actingPlayer == currentPlayer && DiceRolls[currentPlayer].Contains(dieValue) => 
                             HandleMove(dieValue, startingPoint),
-                        //BackgammonBearOff { Player: var actingPlayer, DieValue: var dieValue, StartingPointNumber: var startingPoint } when actingPlayer == currentPlayer && DiceRolls[currentPlayer].Contains(dieValue) =>
-                        //    HandleBearOff(dieValue, startingPoint),
+                        BackgammonBearOff { Player: var actingPlayer, DieValue: var dieValue, StartingPointNumber: var startingPoint } when actingPlayer == currentPlayer && DiceRolls[currentPlayer].Contains(dieValue) =>
+                            HandleBearOff(dieValue, startingPoint),
                         _ => (this, false)
                     };
             }
@@ -211,7 +213,7 @@ namespace SignalRGammon.Backgammon
             resultDice.RemoveAt(resultDice.IndexOf(dieValue));
             return (
                 this.With(
-                    CurrentPlayer: resultDice.Count == 0 ? otherPlayer : player,
+                    CurrentPlayer: resultDice.Count == 0 ? player.OtherPlayer() : player,
                     DiceRolls: DiceRolls.With(player, resultDice.AsReadOnly()),
                     Points: points,
                     Bar: bar
@@ -220,17 +222,59 @@ namespace SignalRGammon.Backgammon
             );
         }
 
-        public int GetEndPoint(Player player, int startingPoint, int dieValue)
+        private (BackgammonState, bool) HandleBearOff(int dieValue, int startingPoint)
         {
+            if (!CurrentPlayer.HasValue)
+                // Can only make a move on a player's turn
+                return (this, false);
 
-            var effectiveStartPoint =
-                startingPoint == -1 ? -1
-                : player == Player.White ? 23 - startingPoint
-                : startingPoint;
-            var effectiveEndPoint = effectiveStartPoint + dieValue;
+            var target = this;
+            var player = CurrentPlayer.Value;
+            if (Bar[player] != 0 || !(from point in Enumerable.Range(0, 24)
+                                     where GetEffectiveStartPoint(player, point) < 18
+                                     select target.Points[point][player] == 0).Any())
+                // All checkers must be on the players' home board to bear off
+                return (this, false);
+
+            var effectiveEndPoint = GetEffectiveEndPoint(player, startingPoint, dieValue);
+            if (effectiveEndPoint < 24)
+                // Checker is not close enough to bear off
+                return (this, false);
+
+            var points = Points.ToImmutableList()
+                .SetItem(startingPoint, new PointState(player, Points[startingPoint][player] - 1, 0));
+
+            var resultDice = DiceRolls[player].ToList();
+            resultDice.RemoveAt(resultDice.IndexOf(dieValue));
+            return (
+                this.With(
+                    CurrentPlayer: resultDice.Count == 0 ? player.OtherPlayer() : player,
+                    DiceRolls: DiceRolls.With(player, resultDice.AsReadOnly()),
+                    Points: points
+                ),
+                true
+            );
+        }
+
+        public static int GetEndPoint(Player player, int startingPoint, int dieValue)
+        {
+            var effectiveEndPoint = GetEffectiveEndPoint(player, startingPoint, dieValue);
             var actualEndPoint = player == Player.White ? 23 - effectiveEndPoint
                 : effectiveEndPoint;
             return actualEndPoint;
+        }
+
+        private static int GetEffectiveEndPoint(Player player, int startingPoint, int dieValue)
+        {
+            var effectiveStartPoint = GetEffectiveStartPoint(player, startingPoint);
+            return effectiveStartPoint + dieValue;
+        }
+
+        private static int GetEffectiveStartPoint(Player player, int startingPoint)
+        {
+            return startingPoint == -1 ? -1
+                   : player == Player.White ? 23 - startingPoint
+                   : startingPoint;
         }
 
         public bool IsAnchor(int actualEndPoint, Player player)

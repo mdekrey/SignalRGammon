@@ -6,7 +6,7 @@ namespace SignalRGammon.Backgammon
     [JsonConverter(typeof(JsonSubtypes), "type")]
     [JsonSubtypes.KnownSubType(typeof(BackgammonDiceRoll), BackgammonDiceRoll.TypeValue)]
     [JsonSubtypes.KnownSubType(typeof(BackgammonMove), BackgammonMove.TypeValue)]
-    //[JsonSubtypes.KnownSubType(typeof(BackgammonBearOff), BackgammonBearOff.TypeValue)]
+    [JsonSubtypes.KnownSubType(typeof(BackgammonBearOff), BackgammonBearOff.TypeValue)]
     [JsonSubtypes.KnownSubType(typeof(BackgammonSetStartingPlayer), BackgammonSetStartingPlayer.TypeValue)]
     public abstract class BackgammonAction
     {
@@ -47,6 +47,5 @@ namespace SignalRGammon.Backgammon
     {
         public const string TypeValue = "start";
         public override string Type => TypeValue;
-        public Player? Player { get; set; }
     }
 }
