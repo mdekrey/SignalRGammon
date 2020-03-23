@@ -47,8 +47,10 @@ namespace SignalRGammon.Backgammon
             DiceState? DiceRolls = null,
             IReadOnlyList<PointState>? Points = null,
             PointState? Bar = null
-        ) =>
-            new BackgammonState
+        ) {
+            var points = Points ?? this.Points;
+            System.Diagnostics.Debug.Assert(points.Count == 24);
+            return new BackgammonState
             {
                 DieRoller = this.DieRoller,
                 CurrentPlayer = CurrentPlayer ?? this.CurrentPlayer,
@@ -56,6 +58,7 @@ namespace SignalRGammon.Backgammon
                 Points = Points ?? this.Points,
                 Bar = Bar ?? this.Bar,
             };
+        }  
 
     }
 

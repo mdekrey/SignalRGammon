@@ -44,7 +44,8 @@ namespace SignalRGammon.Backgammon
         {
             if (action == null)
                 return false;
-            var (next, valid) = await state.Value.state.ApplyAction(action);
+            await Task.Yield();
+            var (next, valid) = state.Value.state.ApplyAction(action);
             if (valid)
             {
                 state.OnNext((next, action));

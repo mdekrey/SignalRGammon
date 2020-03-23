@@ -1,5 +1,6 @@
 ﻿using JsonSubTypes;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace SignalRGammon.Backgammon
 {
@@ -54,6 +55,6 @@ namespace SignalRGammon.Backgammon
     {
         public const string TypeValue = "cannot-use-roll";
         public override string Type => TypeValue;
-        public int DieValue { get; set; }
+        public IEnumerable<int> DieValues { get; set; }
     }
 }

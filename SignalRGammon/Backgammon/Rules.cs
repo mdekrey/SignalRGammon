@@ -6,26 +6,72 @@ using System.Threading.Tasks;
 
 namespace SignalRGammon.Backgammon
 {
+    using static Enumerable;
     using static BackgammonState;
     using PointState = PlayerState<int>;
-    using DiceState = PlayerState<IReadOnlyList<int>>;
-
+    using ActionDispatcher = Func<BackgammonAction, Task<bool>>;
 
     public static class Rules
     {
-        public static async Task CheckAutomaticActions(BackgammonState obj, Func<BackgammonAction, Task<bool>> Do)
+        public static async Task CheckAutomaticActions(BackgammonState obj, ActionDispatcher dispatch)
         {
-            switch (obj)
+            try
             {
-                case { CurrentPlayer: null, DiceRolls: { White: { Count: 1 }, Black: { Count: 1 } } }:
-                    await Do(new BackgammonSetStartingPlayer());
-                    break;
+                switch (obj)
+                {
+                    case { CurrentPlayer: null, DiceRolls: { White: { Count: 1 }, Black: { Count: 1 } } }:
+                        await dispatch(new BackgammonSetStartingPlayer());
+                        break;
+                    case { CurrentPlayer: Player player, DiceRolls: var diceRolls } when diceRolls[player].Count > 0:
+                        await DoInvalidDieRolls(obj, dispatch);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
             }
         }
 
-        public static async Task<(BackgammonState, bool)> ApplyAction(this BackgammonState state, BackgammonAction action)
+        private static async Task DoInvalidDieRolls(BackgammonState state, ActionDispatcher dispatch)
         {
-            await Task.Yield();
+            if (!(state.CurrentPlayer is Player player))
+                return;
+
+            var orderedDice = state.DiceRolls[player].OrderBy(v => v).ToArray();
+            var invalidDiceRolls = orderedDice.Where(v => ValidStates(state, v).Count() == 0).ToArray();
+            if (invalidDiceRolls.Length > 0)
+            {
+                await dispatch(new BackgammonCannotUseRoll { DieValues = invalidDiceRolls });
+            }
+            else if (orderedDice.Length > 1 && orderedDice[0] != orderedDice[1])
+            {
+                var validSecondStates = from state in ValidStates(state, orderedDice[0])
+                                        from secondState in ValidStates(state, orderedDice[1])
+                                        select secondState;
+                if (!validSecondStates.Any())
+                {
+                    await dispatch(new BackgammonCannotUseRoll { DieValues = new[] { orderedDice[0] } });
+                }
+            }
+        }
+
+        static IEnumerable<BackgammonState> ValidStates(BackgammonState obj, int dieRoll)
+        {
+            var validStartingPoints = (from idx in Range(-1, 25)
+                                       from tuple in new (BackgammonAction action, int idx)[]
+                                       {
+                                           (new BackgammonMove { DieValue = dieRoll, Player = obj.CurrentPlayer.Value, StartingPointNumber = idx }, idx),
+                                           (new BackgammonBearOff { DieValue = dieRoll, Player = obj.CurrentPlayer.Value, StartingPointNumber = idx }, idx),
+                                       }
+                                       let applied = obj.ApplyAction(tuple.action)
+                                       where applied.Item2
+                                       select applied.Item1).ToArray();
+            return validStartingPoints;
+        }
+
+        public static (BackgammonState, bool) ApplyAction(this BackgammonState state, BackgammonAction action)
+        {
             switch (state)
             {
                 case { CurrentPlayer: null, DiceRolls: { White: { Count: 1 }, Black: { Count: 1 } } }:
@@ -51,8 +97,8 @@ namespace SignalRGammon.Backgammon
                             state.HandleMove(dieValue, startingPoint),
                         BackgammonBearOff { Player: var actingPlayer, DieValue: var dieValue, StartingPointNumber: var startingPoint } when actingPlayer == currentPlayer && state.DiceRolls[currentPlayer].Contains(dieValue) =>
                             state.HandleBearOff(dieValue, startingPoint),
-                        BackgammonCannotUseRoll { DieValue: var dieValue } =>
-                            state.RevokeDieRoll(dieValue),
+                        BackgammonCannotUseRoll { DieValues: var dieValues } =>
+                            state.RevokeDieRoll(dieValues),
                         _ => (state, false)
                     };
             }
@@ -73,8 +119,15 @@ namespace SignalRGammon.Backgammon
             if (startingPoint == -1 && state.Bar[player] <= 0)
                 // Player has nothing on the bar, but is trying to move off the bar
                 return (state, false);
+            if (startingPoint != -1 && state.Points[startingPoint][player] <= 0)
+                // Player has nothing at this point
+                return (state, false);
 
             var actualEndPoint = GetEndPoint(player, startingPoint, dieValue);
+
+            if (actualEndPoint >= 24)
+                // Used "move" to bear off.
+                return (state, false);
 
             if (state.IsAnchor(actualEndPoint, otherPlayer))
             {
@@ -117,9 +170,16 @@ namespace SignalRGammon.Backgammon
             if (!state.CurrentPlayer.HasValue)
                 // Can only bear off on a player's turn
                 return (state, false);
+            if (startingPoint == -1)
+                // not possible to bear off from the bar
+                return (state, false);
 
             var player = state.CurrentPlayer.Value;
-            if (state.Bar[player] != 0 || !(from point in Enumerable.Range(0, 24)
+            if (state.Points[startingPoint][player] <= 0)
+                // Player has nothing at this point
+                return (state, false);
+
+            if (state.Bar[player] != 0 || !(from point in Range(0, 24)
                                       where GetEffectiveStartPoint(player, point) < 18
                                       select state.Points[point][player] == 0).Any())
                 // All checkers must be on the players' home board to bear off
@@ -145,7 +205,7 @@ namespace SignalRGammon.Backgammon
             );
         }
 
-        private static (BackgammonState, bool) RevokeDieRoll(this BackgammonState state, int dieValue)
+        private static (BackgammonState, bool) RevokeDieRoll(this BackgammonState state, IEnumerable<int> dieValues)
         {
             if (!state.CurrentPlayer.HasValue)
                 // Can only revoke a roll on a player's turn
@@ -153,9 +213,13 @@ namespace SignalRGammon.Backgammon
 
             var player = state.CurrentPlayer.Value;
             var resultDice = state.DiceRolls[player].ToList();
-            resultDice.RemoveAt(resultDice.IndexOf(dieValue));
+            foreach (var dieValue in dieValues)
+            {
+                resultDice.RemoveAt(resultDice.IndexOf(dieValue));
+            }
             return (
                 state.With(
+                    CurrentPlayer: resultDice.Count == 0 ? player.OtherPlayer() : player,
                     DiceRolls: state.DiceRolls.With(player, resultDice.AsReadOnly())
                 ),
                 true
@@ -165,7 +229,8 @@ namespace SignalRGammon.Backgammon
         public static int GetEndPoint(Player player, int startingPoint, int dieValue)
         {
             var effectiveEndPoint = GetEffectiveEndPoint(player, startingPoint, dieValue);
-            var actualEndPoint = player == Player.White ? 23 - effectiveEndPoint
+            var actualEndPoint = effectiveEndPoint >= 24 ? 24 // not an end-point, but bearing-off
+                : player == Player.White ? 23 - effectiveEndPoint
                 : effectiveEndPoint;
             return actualEndPoint;
         }
@@ -185,6 +250,8 @@ namespace SignalRGammon.Backgammon
 
         public static bool IsAnchor(this BackgammonState state, int actualEndPoint, Player player)
         {
+            System.Diagnostics.Debug.Assert(actualEndPoint >= 0);
+            System.Diagnostics.Debug.Assert(actualEndPoint < 24);
             return state.Points[actualEndPoint][player] > 1;
         }
 
