@@ -48,7 +48,7 @@ function contains(array: number[], value: number) {
 }
 
 export function PlayBackgammonComponent() {
-    const { state, roll, move, bearOff, newGame, otherPlayerUrl, playerColor } = useBackgammon();
+    const { state, roll, move, bearOff, newGame, undo, otherPlayerUrl, playerColor } = useBackgammon();
     const [selectedChecker, setSelectedChecker] = useState(null as (number | null));
 
     const gameState = useRx(state, undefined);
@@ -87,9 +87,9 @@ export function PlayBackgammonComponent() {
                     {gameState.state.currentPlayer && gameState.state.points.map(({ black, white }, idx) =>
                         <g transform={pointTransform(idx)} key={idx}>
                             <Checkers count={black} player="black" selectable={selectedChecker === null && playerColor === 'black' && !canRoll} selected={selectedChecker === idx}
-                                onClick={(selectedChecker === null && playerColor === 'black' && !canRoll && black) ? (() => setSelectedChecker(idx)) : undefined} />
+                                onClick={(selectedChecker === null && playerColor === 'black' && !canRoll && black) ? (() => setSelectedChecker(idx)) : () => selectPoint(idx)} />
                             <Checkers count={white} player="white" selectable={selectedChecker === null && playerColor === 'white' && !canRoll} selected={selectedChecker === idx}
-                                onClick={(selectedChecker === null && playerColor === 'white' && !canRoll && white) ? (() => setSelectedChecker(idx)) : undefined} />
+                                onClick={(selectedChecker === null && playerColor === 'white' && !canRoll && white) ? (() => setSelectedChecker(idx)) : () => selectPoint(idx)} />
                             {selectedChecker !== null
                                 ? <Point color="transparent" selectable={contains(allowedPoints, idx)} onClick={() => selectPoint(idx)} />
                                 : null
@@ -113,6 +113,11 @@ export function PlayBackgammonComponent() {
                     </g>
                 </g>
             </svg>
+            {(gameState.state.undo && gameState.state.currentPlayer === playerColor)
+                ? <div className="undo-container">
+                    <button className="undo-button" onClick={undo}>Undo</button>
+                </div>
+                : null}
             {isWaiting || canRoll || winner
                 ? <div className="overlay">
                     <div className="child">
@@ -141,7 +146,8 @@ export function PlayBackgammonComponent() {
         }
         const dieValue = (index - normalizeGutter(selectedChecker, playerColor)) * direction[playerColor];
         setSelectedChecker(null);
-        await move(dieValue, selectedChecker);
+        if (contains(allowedPoints, index))
+            await move(dieValue, selectedChecker);
     }
 
     async function doBearOff() {
@@ -150,7 +156,6 @@ export function PlayBackgammonComponent() {
         }
         const minDieValue = (homeEffectiveValue[playerColor] - normalizeGutter(selectedChecker, playerColor)) * direction[playerColor];
         const rolls = gameState.state.diceRolls[playerColor].filter(roll => roll >= minDieValue).sort();
-        console.log(rolls, minDieValue);
         const dieValue = rolls[0];
         setSelectedChecker(null);
         if (!dieValue) {

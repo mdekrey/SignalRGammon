@@ -9,6 +9,7 @@ namespace SignalRGammon.Backgammon
     [JsonSubtypes.KnownSubType(typeof(BackgammonDiceRoll), BackgammonDiceRoll.TypeValue)]
     [JsonSubtypes.KnownSubType(typeof(BackgammonMove), BackgammonMove.TypeValue)]
     [JsonSubtypes.KnownSubType(typeof(BackgammonBearOff), BackgammonBearOff.TypeValue)]
+    [JsonSubtypes.KnownSubType(typeof(BackgammonUndo), BackgammonUndo.TypeValue)]
     [JsonSubtypes.KnownSubType(typeof(BackgammonSetStartingPlayer), BackgammonSetStartingPlayer.TypeValue)]
     [JsonSubtypes.KnownSubType(typeof(BackgammonCannotUseRoll), BackgammonCannotUseRoll.TypeValue)]
     [JsonSubtypes.KnownSubType(typeof(BackgammonDeclareWinner), BackgammonDeclareWinner.TypeValue)]
@@ -45,6 +46,13 @@ namespace SignalRGammon.Backgammon
         public int DieValue { get; set; }
         public int StartingPointNumber { get; set; }
     }
+
+    public class BackgammonUndo : BackgammonAction
+    {
+        public const string TypeValue = "undo";
+        public override string Type => TypeValue;
+    }
+
 
     public class BackgammonSetStartingPlayer : BackgammonAction
     {

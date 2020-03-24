@@ -23,3 +23,9 @@
 .PlayBackgammon .roll-button-container button {
     font-size: 2rem;
 }
+
+.PlayBackgammon .undo-container {
+    position: absolute;
+    top: 50%;
+    left: 30%;
+}

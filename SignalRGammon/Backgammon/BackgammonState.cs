@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
@@ -9,17 +10,18 @@ namespace SignalRGammon.Backgammon
     using PointState = PlayerState<int>;
     using DiceState = PlayerState<IReadOnlyList<int>>;
 
-    public struct BackgammonState
+    public class BackgammonState
     {
         [JsonIgnore]
         public IDieRoller DieRoller { get; private set; }
         public Player? CurrentPlayer { get; private set; }
         public Player? Winner { get; private set; }
         public DiceState DiceRolls { get; private set; }
-        public IReadOnlyList<PointState> Points { get; private set; }
+        public IReadOnlyList<PointState> Points { get; private set; } = Array.Empty<PointState>();
         public PointState Bar { get; private set; }
+        public BackgammonState? Undo { get; private set; }
 
-        public BackgammonState(IDieRoller dieRoller) : this()
+        public BackgammonState(IDieRoller dieRoller)
         {
             DieRoller = dieRoller;
         }
@@ -35,9 +37,8 @@ namespace SignalRGammon.Backgammon
         }
 
         public static BackgammonState DefaultState(IDieRoller dieRoller) =>
-            new BackgammonState
+            new BackgammonState(dieRoller)
             {
-                DieRoller = dieRoller,
                 CurrentPlayer = null,
                 Winner = null,
                 DiceRolls = Defaults.EmptyDiceRolls,
@@ -46,6 +47,7 @@ namespace SignalRGammon.Backgammon
             };
 
         public BackgammonState With(
+            BackgammonState? Undo,
             Player? CurrentPlayer = null,
             Player? Winner = null,
             DiceState? DiceRolls = null,
@@ -54,14 +56,14 @@ namespace SignalRGammon.Backgammon
         ) {
             var points = Points ?? this.Points;
             System.Diagnostics.Debug.Assert(points.Count == 24);
-            return new BackgammonState
+            return new BackgammonState(this.DieRoller)
             {
-                DieRoller = this.DieRoller,
                 CurrentPlayer = CurrentPlayer ?? this.CurrentPlayer,
                 Winner = Winner ?? this.Winner,
                 DiceRolls = DiceRolls ?? this.DiceRolls,
                 Points = Points ?? this.Points,
                 Bar = Bar ?? this.Bar,
+                Undo = Undo,
             };
         }  
 

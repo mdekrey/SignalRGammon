@@ -13,4 +13,5 @@ export interface BackgammonState {
         white: number;
         black: number;
     };
+    undo: null | BackgammonState;
 }

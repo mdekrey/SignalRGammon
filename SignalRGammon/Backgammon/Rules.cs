@@ -83,31 +83,37 @@ namespace SignalRGammon.Backgammon
 
         public static (BackgammonState, bool) ApplyAction(this BackgammonState state, BackgammonAction action)
         {
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
             switch (state)
             {
+                case null:
+                    throw new ArgumentNullException(nameof(state));
                 case { Winner: null, CurrentPlayer: null, DiceRolls: { White: { Count: 1 }, Black: { Count: 1 } } }:
                     if (!(action is BackgammonSetStartingPlayer))
                         return (state, false);
                     return (state.DiceRolls.White[0], state.DiceRolls.Black[0]) switch
                     {
-                        (int white, int black) when white < black => (state.With(CurrentPlayer: Player.Black, DiceRolls: Defaults.EmptyDiceRolls.With(Player.Black, new[] { black, white })), true),
-                        (int white, int black) when white > black => (state.With(CurrentPlayer: Player.White, DiceRolls: Defaults.EmptyDiceRolls.With(Player.White, new[] { white, black })), true),
+                        (int white, int black) when white < black => (state.With(null, CurrentPlayer: Player.Black, DiceRolls: Defaults.EmptyDiceRolls.With(Player.Black, new[] { black, white })), true),
+                        (int white, int black) when white > black => (state.With(null, CurrentPlayer: Player.White, DiceRolls: Defaults.EmptyDiceRolls.With(Player.White, new[] { white, black })), true),
                         _ => (DefaultState(state.DieRoller), true),
                     };
                 case { Winner: null, CurrentPlayer: null }:
                     return action switch
                     {
-                        BackgammonDiceRoll { Player: var player } when state.DiceRolls[player].Count == 0 => (state.With(DiceRolls: state.DiceRolls.With(player, new[] { state.DieRoller.RollDie() })), true),
+                        BackgammonDiceRoll { Player: var player } when state.DiceRolls[player].Count == 0 => (state.With(null, DiceRolls: state.DiceRolls.With(player, new[] { state.DieRoller.RollDie() })), true),
                         _ => (state, false)
                     };
                 case { Winner: null, CurrentPlayer: Player currentPlayer }:
                     return action switch
                     {
-                        BackgammonDiceRoll { Player: var actingPlayer } when actingPlayer == currentPlayer && state.DiceRolls[currentPlayer].Count == 0 => (state.With(DiceRolls: Defaults.EmptyDiceRolls.With(currentPlayer, state.DieRoller.RollDiceWithDoubles())), true),
+                        BackgammonDiceRoll { Player: var actingPlayer } when actingPlayer == currentPlayer && state.DiceRolls[currentPlayer].Count == 0 => (state.With(null, DiceRolls: Defaults.EmptyDiceRolls.With(currentPlayer, state.DieRoller.RollDiceWithDoubles())), true),
                         BackgammonMove { Player: var actingPlayer, DieValue: var dieValue, StartingPointNumber: var startingPoint } when actingPlayer == currentPlayer && state.DiceRolls[currentPlayer].Contains(dieValue) =>
                             state.HandleMove(dieValue, startingPoint),
                         BackgammonBearOff { Player: var actingPlayer, DieValue: var dieValue, StartingPointNumber: var startingPoint } when actingPlayer == currentPlayer && state.DiceRolls[currentPlayer].Contains(dieValue) =>
                             state.HandleBearOff(dieValue, startingPoint),
+                        BackgammonUndo _ when state.Undo != null =>
+                            (state.Undo, true),
                         BackgammonCannotUseRoll { DieValues: var dieValues } =>
                             state.RevokeDieRoll(dieValues),
                         BackgammonDeclareWinner { Player: var player } =>
@@ -120,7 +126,7 @@ namespace SignalRGammon.Backgammon
                         BackgammonNewGame _ => (DefaultState(state.DieRoller), true),
                         _ => (state, false)
                     };
-        }
+            }
         }
 
 
@@ -175,6 +181,7 @@ namespace SignalRGammon.Backgammon
             resultDice.RemoveAt(resultDice.IndexOf(dieValue));
             return (
                 state.With(
+                    resultDice.Count == 0 ? null : state,
                     CurrentPlayer: resultDice.Count == 0 ? player.OtherPlayer() : player,
                     DiceRolls: state.DiceRolls.With(player, resultDice.AsReadOnly()),
                     Points: points,
@@ -216,6 +223,7 @@ namespace SignalRGammon.Backgammon
             resultDice.RemoveAt(resultDice.IndexOf(dieValue));
             return (
                 state.With(
+                    resultDice.Count == 0 ? null : state,
                     CurrentPlayer: resultDice.Count == 0 ? player.OtherPlayer() : player,
                     DiceRolls: state.DiceRolls.With(player, resultDice.AsReadOnly()),
                     Points: points
@@ -238,6 +246,7 @@ namespace SignalRGammon.Backgammon
             }
             return (
                 state.With(
+                    state.Undo,
                     CurrentPlayer: resultDice.Count == 0 ? player.OtherPlayer() : player,
                     DiceRolls: state.DiceRolls.With(player, resultDice.AsReadOnly())
                 ),
@@ -253,6 +262,7 @@ namespace SignalRGammon.Backgammon
 
             return (
                 state.With(
+                    null,
                     Winner: player
                 ),
                 true
