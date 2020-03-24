@@ -1,5 +1,6 @@
 export interface BackgammonState {
-    currentPlayer: 'white' | 'black';
+    winner: 'white' | 'black' | null;
+    currentPlayer: 'white' | 'black' | null;
     diceRolls: {
         white: number[];
         black: number[];

@@ -1,6 +1,7 @@
 ﻿using JsonSubTypes;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SignalRGammon.Backgammon
 {
@@ -10,14 +11,14 @@ namespace SignalRGammon.Backgammon
     [JsonSubtypes.KnownSubType(typeof(BackgammonBearOff), BackgammonBearOff.TypeValue)]
     [JsonSubtypes.KnownSubType(typeof(BackgammonSetStartingPlayer), BackgammonSetStartingPlayer.TypeValue)]
     [JsonSubtypes.KnownSubType(typeof(BackgammonCannotUseRoll), BackgammonCannotUseRoll.TypeValue)]
+    [JsonSubtypes.KnownSubType(typeof(BackgammonDeclareWinner), BackgammonDeclareWinner.TypeValue)]
+    [JsonSubtypes.KnownSubType(typeof(BackgammonNewGame), BackgammonNewGame.TypeValue)]
     public abstract class BackgammonAction
     {
-#nullable disable
         /// <summary>
         /// Used by JsonConverter; this property is required for the type to be serialized.
         /// </summary>
         public abstract string Type { get; }
-#nullable restore
     }
 
     public class BackgammonDiceRoll : BackgammonAction
@@ -55,6 +56,19 @@ namespace SignalRGammon.Backgammon
     {
         public const string TypeValue = "cannot-use-roll";
         public override string Type => TypeValue;
-        public IEnumerable<int> DieValues { get; set; }
+        public IEnumerable<int> DieValues { get; set; } = Enumerable.Empty<int>();
+    }
+
+    public class BackgammonDeclareWinner : BackgammonAction
+    {
+        public const string TypeValue = "declare-winner";
+        public override string Type => TypeValue;
+        public Player Player { get; set; }
+    }
+
+    public class BackgammonNewGame : BackgammonAction
+    {
+        public const string TypeValue = "new-game";
+        public override string Type => TypeValue;
     }
 }

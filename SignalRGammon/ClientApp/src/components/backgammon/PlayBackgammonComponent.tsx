@@ -48,7 +48,7 @@ function contains(array: number[], value: number) {
 }
 
 export function PlayBackgammonComponent() {
-    const { state, roll, move, bearOff, otherPlayerUrl, playerColor } = useBackgammon();
+    const { state, roll, move, bearOff, newGame, otherPlayerUrl, playerColor } = useBackgammon();
     const [selectedChecker, setSelectedChecker] = useState(null as (number | null));
 
     const gameState = useRx(state, undefined);
@@ -66,9 +66,10 @@ export function PlayBackgammonComponent() {
         );
     }
 
-    const canRoll = gameState.state.diceRolls[playerColor].length === 0
+    const canRoll = !gameState.state.winner && gameState.state.diceRolls[playerColor].length === 0
         && (gameState.state.currentPlayer === null || gameState.state.currentPlayer === playerColor);
-    const isWaiting = !canRoll && gameState.state.currentPlayer !== playerColor;
+    const isWaiting = !gameState.state.winner && !canRoll && gameState.state.currentPlayer !== playerColor;
+    const winner = gameState.state.winner;
 
     const allowedPoints = selectedChecker === null
         ? []
@@ -112,13 +113,17 @@ export function PlayBackgammonComponent() {
                     </g>
                 </g>
             </svg>
-            {isWaiting || canRoll
+            {isWaiting || canRoll || winner
                 ? <div className="overlay">
                     <div className="child">
                         {gameState.state.currentPlayer === null
                             && <div className="share-link">Share this with the other player: <input type="text" value={otherPlayerUrl} onClick={copyUrl} readOnly /></div>}
                         {canRoll && <div className="roll-button-container"><button className="roll-button" onClick={roll} disabled={!gameState}>Roll</button></div>}
                         {isWaiting && <div className="waiting-container"><h1>Waiting on the other player...</h1></div>}
+                        {winner && <div className="winner-container">
+                            <h1>{winner === playerColor ? "You won!" : "The other player won."}</h1>
+                            <button className="new-game-button" onClick={newGame}>Play Again?</button>
+                        </div>}
                     </div>
                 </div>
                 : null}

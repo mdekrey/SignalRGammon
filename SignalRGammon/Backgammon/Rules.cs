@@ -13,17 +13,20 @@ namespace SignalRGammon.Backgammon
 
     public static class Rules
     {
-        public static async Task CheckAutomaticActions(BackgammonState obj, ActionDispatcher dispatch)
+        public static async Task CheckAutomaticActions(BackgammonState state, ActionDispatcher dispatch)
         {
             try
             {
-                switch (obj)
+                switch (state)
                 {
-                    case { CurrentPlayer: null, DiceRolls: { White: { Count: 1 }, Black: { Count: 1 } } }:
+                    case { Winner: null, CurrentPlayer: null, DiceRolls: { White: { Count: 1 }, Black: { Count: 1 } } }:
                         await dispatch(new BackgammonSetStartingPlayer());
                         break;
-                    case { CurrentPlayer: Player player, DiceRolls: var diceRolls } when diceRolls[player].Count > 0:
-                        await DoInvalidDieRolls(obj, dispatch);
+                    case { Winner: null, DiceRolls: { White: { Count: 0 }, Black: { Count: 0 } } }:
+                        await CheckForWinner(state, dispatch);
+                        break;
+                    case { Winner: null, CurrentPlayer: Player player, DiceRolls: var diceRolls } when diceRolls[player].Count > 0:
+                        await DoInvalidDieRolls(state, dispatch);
                         break;
                 }
             }
@@ -33,27 +36,35 @@ namespace SignalRGammon.Backgammon
             }
         }
 
+        private static async Task CheckForWinner(BackgammonState state, ActionDispatcher dispatch)
+        {
+            if (state.Points.All(p => p.White == 0))
+            {
+                await dispatch(new BackgammonDeclareWinner { Player = Player.White });
+            }
+            else if (state.Points.All(p => p.Black == 0))
+            {
+                await dispatch(new BackgammonDeclareWinner { Player = Player.Black });
+            }
+        }
+
         private static async Task DoInvalidDieRolls(BackgammonState state, ActionDispatcher dispatch)
         {
             if (!(state.CurrentPlayer is Player player))
                 return;
 
             var orderedDice = state.DiceRolls[player].OrderBy(v => v).ToArray();
-            var invalidDiceRolls = orderedDice.Where(v => ValidStates(state, v).Count() == 0).ToArray();
-            if (invalidDiceRolls.Length > 0)
+            var validFirstStates = (from die in orderedDice
+                                   from nextState in ValidStates(state, die)
+                                   group nextState by die).ToArray();
+            if (validFirstStates.All(e => e.Count() == 0))
             {
-                await dispatch(new BackgammonCannotUseRoll { DieValues = invalidDiceRolls });
+                // no valid moves
+                await dispatch(new BackgammonCannotUseRoll { DieValues = orderedDice });
+                return;
             }
-            else if (orderedDice.Length > 1 && orderedDice[0] != orderedDice[1])
-            {
-                var validSecondStates = from state in ValidStates(state, orderedDice[0])
-                                        from secondState in ValidStates(state, orderedDice[1])
-                                        select secondState;
-                if (!validSecondStates.Any())
-                {
-                    await dispatch(new BackgammonCannotUseRoll { DieValues = new[] { orderedDice[0] } });
-                }
-            }
+
+            // We can't really remove other dice due to it maybe becoming valid in a different order; we'd have to disable dice in the first round, which isn't exactly something currently in the state machine...
         }
 
         static IEnumerable<BackgammonState> ValidStates(BackgammonState obj, int dieRoll)
@@ -74,7 +85,7 @@ namespace SignalRGammon.Backgammon
         {
             switch (state)
             {
-                case { CurrentPlayer: null, DiceRolls: { White: { Count: 1 }, Black: { Count: 1 } } }:
+                case { Winner: null, CurrentPlayer: null, DiceRolls: { White: { Count: 1 }, Black: { Count: 1 } } }:
                     if (!(action is BackgammonSetStartingPlayer))
                         return (state, false);
                     return (state.DiceRolls.White[0], state.DiceRolls.Black[0]) switch
@@ -83,13 +94,13 @@ namespace SignalRGammon.Backgammon
                         (int white, int black) when white > black => (state.With(CurrentPlayer: Player.White, DiceRolls: Defaults.EmptyDiceRolls.With(Player.White, new[] { white, black })), true),
                         _ => (DefaultState(state.DieRoller), true),
                     };
-                case { CurrentPlayer: null }:
+                case { Winner: null, CurrentPlayer: null }:
                     return action switch
                     {
                         BackgammonDiceRoll { Player: var player } when state.DiceRolls[player].Count == 0 => (state.With(DiceRolls: state.DiceRolls.With(player, new[] { state.DieRoller.RollDie() })), true),
                         _ => (state, false)
                     };
-                case { CurrentPlayer: Player currentPlayer }:
+                case { Winner: null, CurrentPlayer: Player currentPlayer }:
                     return action switch
                     {
                         BackgammonDiceRoll { Player: var actingPlayer } when actingPlayer == currentPlayer && state.DiceRolls[currentPlayer].Count == 0 => (state.With(DiceRolls: Defaults.EmptyDiceRolls.With(currentPlayer, state.DieRoller.RollDiceWithDoubles())), true),
@@ -99,9 +110,17 @@ namespace SignalRGammon.Backgammon
                             state.HandleBearOff(dieValue, startingPoint),
                         BackgammonCannotUseRoll { DieValues: var dieValues } =>
                             state.RevokeDieRoll(dieValues),
+                        BackgammonDeclareWinner { Player: var player } =>
+                            state.DeclareWinner(player),
                         _ => (state, false)
                     };
-            }
+                case { Winner: Player _ }:
+                    return action switch
+                    {
+                        BackgammonNewGame _ => (DefaultState(state.DieRoller), true),
+                        _ => (state, false)
+                    };
+        }
         }
 
 
@@ -221,6 +240,20 @@ namespace SignalRGammon.Backgammon
                 state.With(
                     CurrentPlayer: resultDice.Count == 0 ? player.OtherPlayer() : player,
                     DiceRolls: state.DiceRolls.With(player, resultDice.AsReadOnly())
+                ),
+                true
+            );
+        }
+
+        private static (BackgammonState, bool) DeclareWinner(this BackgammonState state, Player player)
+        {
+            if (!state.Points.All(p => p[player] == 0))
+                // Can only revoke a roll on a player's turn
+                return (state, false);
+
+            return (
+                state.With(
+                    Winner: player
                 ),
                 true
             );

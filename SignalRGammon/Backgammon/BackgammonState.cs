@@ -14,6 +14,7 @@ namespace SignalRGammon.Backgammon
         [JsonIgnore]
         public IDieRoller DieRoller { get; private set; }
         public Player? CurrentPlayer { get; private set; }
+        public Player? Winner { get; private set; }
         public DiceState DiceRolls { get; private set; }
         public IReadOnlyList<PointState> Points { get; private set; }
         public PointState Bar { get; private set; }
@@ -27,6 +28,7 @@ namespace SignalRGammon.Backgammon
         {
             this.DieRoller = original.DieRoller;
             this.CurrentPlayer = original.CurrentPlayer;
+            this.Winner = original.Winner;
             this.DiceRolls = original.DiceRolls;
             this.Points = original.Points;
             this.Bar = original.Bar;
@@ -37,6 +39,7 @@ namespace SignalRGammon.Backgammon
             {
                 DieRoller = dieRoller,
                 CurrentPlayer = null,
+                Winner = null,
                 DiceRolls = Defaults.EmptyDiceRolls,
                 Points = StartingPosition,
                 Bar = Defaults.EmptyPoint,
@@ -44,6 +47,7 @@ namespace SignalRGammon.Backgammon
 
         public BackgammonState With(
             Player? CurrentPlayer = null,
+            Player? Winner = null,
             DiceState? DiceRolls = null,
             IReadOnlyList<PointState>? Points = null,
             PointState? Bar = null
@@ -54,6 +58,7 @@ namespace SignalRGammon.Backgammon
             {
                 DieRoller = this.DieRoller,
                 CurrentPlayer = CurrentPlayer ?? this.CurrentPlayer,
+                Winner = Winner ?? this.Winner,
                 DiceRolls = DiceRolls ?? this.DiceRolls,
                 Points = Points ?? this.Points,
                 Bar = Bar ?? this.Bar,

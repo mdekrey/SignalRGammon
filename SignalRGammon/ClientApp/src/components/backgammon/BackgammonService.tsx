@@ -15,6 +15,7 @@ export type BackgammonContextResult = {
     roll: () => Promise<boolean>
     move: (dieValue: number, startingPointIndex: number) => Promise<boolean>
     bearOff: (dieValue: number, startingPointIndex: number) => Promise<boolean>
+    newGame: () => Promise<boolean>
     otherPlayerUrl: string
     playerColor: "white" | "black";
 };
@@ -50,6 +51,11 @@ export function BackgammonScope({ gameId, playerColor, children }: BackgammonSco
         return await connection.invoke<boolean>('Do', gameId, JSON.stringify({ type: 'bear-off', player: playerColor, dieValue, startingPointNumber: startingPointIndex }));
     }, [connected, connection, playerColor, gameId])
 
+    const newGame = useCallback(async () => {
+        await connected;
+        return await connection.invoke<boolean>('Do', gameId, JSON.stringify({ type: 'new-game' }));
+    }, [connected, connection, gameId])
+
     const state = useMemo(() => from(connected)
         .pipe(
             switchMap(() => fromSignalR(connection.stream('ListenState', gameId))),
@@ -60,6 +66,7 @@ export function BackgammonScope({ gameId, playerColor, children }: BackgammonSco
         roll,
         move,
         bearOff,
+        newGame,
         otherPlayerUrl,
         playerColor,
     }), [state, roll, otherPlayerUrl, playerColor]);
