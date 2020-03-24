@@ -20,7 +20,7 @@ export const Die = ({ player, value, selectable = false, onSelect }: { player: '
         <g className={`die ${player} ${selectable ? 'selectable' : ''}`} transform={`rotate(${rotation})`} onClick={onSelect}>
             <rect width={dieSize} height={dieSize} x={-dieSize / 2} y={-dieSize / 2} strokeWidth={stroke} />
             {(positions[value - 1] || []).map(({ x, y }, idx) =>
-            <circle r={pipRadius} className="pip" key={idx} cx={x} cy={y} />
+                <circle r={pipRadius} className="pip" key={idx} cx={x} cy={y} />
             )}
         </g>
     );

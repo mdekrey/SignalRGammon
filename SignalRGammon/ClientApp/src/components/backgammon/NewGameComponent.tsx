@@ -2,14 +2,14 @@ import React from 'react';
 import { useGameConnection } from '../../services/gameConnectionContext';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { Checker } from './svg-parts/Checker';
-import { Filters } from './svg-parts/Filters';
+import { Filters, filtersVariables } from './svg-parts/Filters';
 import { checkerDiameter, checkerRadius } from './svg-parts/sizes';
 import { Felt } from './svg-parts/Felt';
 
 function Selector({ player }: { player: 'white' | 'black' }) {
     const padding = 1.6;
     return (
-        <svg style={{ width: '20vmin', height: '20vmin' }} viewBox={`0 0 ${checkerDiameter * padding} ${checkerDiameter * padding}`}>
+        <svg style={{ width: '20vmin', height: '20vmin', ...filtersVariables() }} viewBox={`0 0 ${checkerDiameter * padding} ${checkerDiameter * padding}`}>
             <Filters />
             <Felt width={checkerDiameter * padding} height={checkerDiameter * padding} />
             <g transform={`translate(${checkerRadius * padding} ${checkerRadius * padding})`}>

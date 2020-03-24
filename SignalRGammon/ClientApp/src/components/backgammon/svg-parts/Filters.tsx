@@ -3,9 +3,17 @@ import React from 'react';
 import "./styles.css";
 import { boardWidth, boardHeight } from './sizes';
 
-export const Filters = () =>
-    <>
+export function filtersVariables(): Object {
+    return {
+        '--dropshadow': `url(${window.location.pathname}#dropshadow)`,
+        '--noise': `url(${window.location.pathname}#noise)`,
+        '--selectionGlow': `url(${window.location.pathname}#selectionGlow)`,
+        '--boardMask': `url(${window.location.pathname}#boardMask)`,
+    };
+}
 
+export const Filters = () =>
+    <defs>
         <filter id="dropshadow" height="130%">
             <feGaussianBlur in="SourceAlpha" stdDeviation="3" /> {/* stdDeviation is how much to blur */}
             <feOffset dx="2" dy="2" result="offsetblur" /> {/* how much to offset */}
@@ -44,4 +52,4 @@ export const Filters = () =>
         <mask id="boardMask">
             <rect x="0" y="0" width={boardWidth} height={boardHeight} fill="white" />
         </mask>
-    </>
+    </defs>

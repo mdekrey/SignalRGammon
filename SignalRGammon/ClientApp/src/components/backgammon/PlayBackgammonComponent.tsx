@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useRx } from '../../utils/useRx';
 import { useBackgammon } from './BackgammonService';
 import { Board } from './svg-parts/Board';
-import { Filters } from './svg-parts/Filters';
+import { Filters, filtersVariables } from './svg-parts/Filters';
 import { boardWidth, boardHeight } from './svg-parts/sizes';
 import { pointTransform, Point } from './svg-parts/Point';
 import { Dice } from './svg-parts/Dice';
@@ -77,7 +77,7 @@ export function PlayBackgammonComponent() {
 
     return (
         <div className="PlayBackgammon">
-            <svg style={{ width: 'calc(100vw - 20px)', height: 'calc(100vh - 20px)' }}
+            <svg style={{ width: 'calc(100vw - 20px)', height: 'calc(100vh - 20px)', ...filtersVariables() }}
                 viewBox={`0 0 ${boardWidth} ${boardHeight}`}
                 preserveAspectRatio="xMidYMid meet">
                 <Filters />
