@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: signalr-gammon
+  labels:
+    app: signalr-gammon
+spec:
+  tls:
+    - hosts:
+      - games.dekrey.net
+      secretName: dekrey-net-games-tls
+  rules:
+    - host: games.dekrey.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: signalr-gammon
+              servicePort: 80

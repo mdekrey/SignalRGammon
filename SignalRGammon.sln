@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalRGammon", "SignalRGam
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalRGammon.Tests", "SignalRGammon.Tests\SignalRGammon.Tests.csproj", "{AFEA7B1A-2271-48F9-8813-06B3FAB5A84F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RawTemplate", "RawTemplate\RawTemplate.csproj", "{39C0D5FF-8732-4BDF-AA7A-0DA80A90AAFD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{AFEA7B1A-2271-48F9-8813-06B3FAB5A84F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AFEA7B1A-2271-48F9-8813-06B3FAB5A84F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AFEA7B1A-2271-48F9-8813-06B3FAB5A84F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39C0D5FF-8732-4BDF-AA7A-0DA80A90AAFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39C0D5FF-8732-4BDF-AA7A-0DA80A90AAFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39C0D5FF-8732-4BDF-AA7A-0DA80A90AAFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39C0D5FF-8732-4BDF-AA7A-0DA80A90AAFD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,1 @@
+docker build . -f ./SignalRGammon/Dockerfile -t dekreydotnet.azurecr.io/signalrgammon

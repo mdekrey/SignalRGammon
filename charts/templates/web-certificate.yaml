@@ -1,0 +1,11 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: dekrey-net-games-tls
+spec:
+  secretName: dekrey-net-games-tls
+  commonName: games.dekrey.net
+  dnsNames:
+  - games.dekrey.net
+  issuerRef:
+    name: letsencrypt
