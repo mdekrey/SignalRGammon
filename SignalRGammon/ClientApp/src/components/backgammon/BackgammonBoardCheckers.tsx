@@ -54,16 +54,29 @@ export function BackgammonBoardCheckers({ canRoll, state, checkers, diceRolls }:
     const allowedPoints = selectedChecker === null
         ? []
         : diceRolls[playerColor].map(die => normalizeBearOff(normalizeGutter(selectedChecker, playerColor) + die * direction[playerColor], playerColor));
-    const isPlayerBlack = playerColor === 'black';
-    const isPlayerWhite = playerColor === 'white';
 
     return (
         <>
             <HomeArea selectable={isAllowed(homeValue)} onClick={doBearOff} />
-            {state.points.map(({ black, white }, idx) =>
+            {players.map(player =>
+                <React.Fragment key={player}>
+                    {checkers[player].map(checker => (
+                        <g style={{ transition: "transform 1s", pointerEvents: "none" }} transform={fullCheckerTranslation(checker.indexInLocation, checker.ofCount, checker.location, player)} key={checker.id}>
+                            <Checker player={player} />
+                        </g>
+                    ))}
+                </React.Fragment>
+            )}
+            {state.points.map((point, idx) =>
                 <g transform={pointTransform(idx)} key={idx}>
-                    <Checkers count={black} player="black" selectable={canSelectChecker && isPlayerBlack} selected={selectedChecker === idx} onClick={() => (canSelectChecker && isPlayerBlack) ? setSelectedChecker(idx) : selectPoint(idx)} />
-                    <Checkers count={white} player="white" selectable={canSelectChecker && isPlayerWhite} selected={selectedChecker === idx} onClick={() => (canSelectChecker && isPlayerWhite) ? setSelectedChecker(idx) : selectPoint(idx)} />
+                    {players.map(player =>
+                        <Checkers key={player}
+                                  count={point[player]}
+                                  player="transparent"
+                                  selectable={canSelectChecker && playerColor === player}
+                                  selected={selectedChecker === idx}
+                                  onClick={() => (canSelectChecker && playerColor === player) ? setSelectedChecker(idx) : selectPoint(idx)} />
+                    )}
                     {selectedChecker !== null
                         ? <Point color="transparent" selectable={isAllowed(idx)} onClick={() => selectPoint(idx)} />
                         : null}
@@ -72,20 +85,11 @@ export function BackgammonBoardCheckers({ canRoll, state, checkers, diceRolls }:
             {players.map(player =>
                 <g transform={pointTransform(bar, player)} key={player}>
                     <Checkers
-                        count={state.bar[player]} player={player}
+                        count={state.bar[player]} player={"transparent"}
                         selectable={canSelectChecker && playerColor === player}
                         selected={playerColor === player && selectedChecker === barValue}
                         onClick={() => (canSelectChecker && playerColor === player) ? setSelectedChecker(barValue) : setSelectedChecker(null)} />
                 </g>
-            )}
-            {players.map(player =>
-                <React.Fragment key={player}>
-                    {checkers[player].map(checker => (
-                        <g style={{ transition: "transform 1s" }} transform={fullCheckerTranslation(checker.indexInLocation, checker.ofCount, checker.location, player)} key={checker.id}>
-                            <Checker player={player} />
-                        </g>
-                    ))}
-                </React.Fragment>
             )}
         </>
     );

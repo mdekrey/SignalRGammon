@@ -7,7 +7,7 @@ import { pointPosition } from './Point';
 
 export type CheckersProps = {
     count: number;
-    player: 'black' | 'white';
+    player: 'black' | 'white' | 'transparent';
     selectable?: boolean;
     selected?: boolean;
     onClick?: () => void;
@@ -16,10 +16,12 @@ export type CheckersProps = {
 export function Checkers({ count, player, selectable = false, selected = false, onClick }: CheckersProps) {
     if (!count)
         return null;
+    if (!selectable && !selected)
+        return null;
     return (<g className={selectable ? "selectable-container" : undefined} onClick={onClick}>
-        {arrayOf(count).map((_, idx) => <g transform={checkerTranslation(idx, count)} key={idx}>
-            <Checker player={player} selectable={count - 1 === idx && selectable} selected={count - 1 === idx && selected} />
-        </g>)}
+        <g transform={checkerTranslation(count - 1, count)}>
+            <Checker player={player} selectable={selectable} selected={selected} />
+        </g>
         {selectable
             ? <rect x={-checkerRadius} y={0} width={checkerDiameter} height={checkerDiameter * checkersMaxCount} fill="transparent" />
             : null}

@@ -94,7 +94,6 @@ function doAdjustment(points: PerPlayer<Points>, state: BackgammonState, player:
                 if (unused.length) {
                     id = unused.pop()!;
                 } else {
-                    console.log("need new id", unused);
                     id = makeId();
                 }
                 checkers.push({ location: key, id, indexInLocation: i, ofCount: expectedCount });

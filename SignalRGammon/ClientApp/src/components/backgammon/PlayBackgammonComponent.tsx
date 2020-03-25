@@ -29,8 +29,6 @@ export function PlayBackgammonComponent() {
         );
     }
 
-    console.log(gameState.checkers);
-
     const canRoll = !gameState.state.winner && gameState.state.diceRolls[playerColor].length === 0
         && (gameState.state.currentPlayer === null || gameState.state.currentPlayer === playerColor);
     const isWaiting = !gameState.state.winner && !canRoll && gameState.state.currentPlayer !== playerColor;
