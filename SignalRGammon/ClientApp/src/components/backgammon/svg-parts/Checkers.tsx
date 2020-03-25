@@ -12,6 +12,8 @@ export type CheckersProps = {
 };
 
 export function Checkers({ count, player, selectable = false, selected = false, onClick }: CheckersProps) {
+    if (!count)
+        return null;
     return (<g className={selectable ? "selectable-container" : undefined} onClick={onClick}>
         {arrayOf(count).map((_, idx) => <g transform={`translate(0 ${checkerFactor(idx, count) * checkerDiameter})`} key={idx}>
             <Checker player={player} selectable={count - 1 === idx && selectable} selected={count - 1 === idx && selected} />

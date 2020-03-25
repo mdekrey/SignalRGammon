@@ -26,3 +26,13 @@ export const anchorRight = boardWidth - (border * 2 + checkerDiameter);
 
 export const whiteDicePosition = `translate(${(anchorRight - anchorLeft) / 4 + anchorLeft - border / 2}, ${boardHeight / 2}) rotate(20)`;
 export const blackDicePosition = `translate(${(anchorRight - anchorLeft) * 3 / 4 + anchorLeft + border / 2}, ${boardHeight / 2}) rotate(-20)`;
+
+export const boardPositions = Object.freeze({
+    viewbox: `0 0 ${boardWidth} ${boardHeight}`,
+    blackRotation: undefined,
+    whiteRotation: `translate(${boardWidth},${boardHeight}) rotate(180)`,
+    blackBar: `translate(${boardWidth / 2}, ${boardHeight / 2}) rotate(180)`,
+    whiteBar: `translate(${boardWidth / 2}, ${boardHeight / 2})`,
+    whiteDice: `translate(${boardWidth / 4}, ${boardHeight / 2})`,
+    blackDice: `translate(${boardWidth * 3 / 4}, ${boardHeight / 2})`,
+});

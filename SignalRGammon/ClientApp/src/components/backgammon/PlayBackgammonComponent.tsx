@@ -4,7 +4,7 @@ import { useRx } from '../../utils/useRx';
 import { useBackgammon } from './BackgammonService';
 import { Board } from './svg-parts/Board';
 import { Filters, filtersVariables } from './svg-parts/Filters';
-import { boardWidth, boardHeight } from './svg-parts/sizes';
+import { boardWidth, boardHeight, boardPositions } from './svg-parts/sizes';
 import { pointTransform, Point } from './svg-parts/Point';
 import { Dice } from './svg-parts/Dice';
 import { Checkers } from './svg-parts/Checkers';
@@ -57,7 +57,8 @@ export function PlayBackgammonComponent() {
         return (
             <h1>Loading...</h1>
         );
-    } else if (gameState === null) {
+    }
+    if (gameState === null) {
         return (
             <>
                 <h1>The game has expired.</h1>
@@ -68,47 +69,52 @@ export function PlayBackgammonComponent() {
 
     const canRoll = !gameState.state.winner && gameState.state.diceRolls[playerColor].length === 0
         && (gameState.state.currentPlayer === null || gameState.state.currentPlayer === playerColor);
+    const canSelectChecker = selectedChecker === null && !canRoll;
     const isWaiting = !gameState.state.winner && !canRoll && gameState.state.currentPlayer !== playerColor;
     const winner = gameState.state.winner;
 
     const allowedPoints = selectedChecker === null
         ? []
         : gameState.state.diceRolls[playerColor].map(die => normalizeBearOff(normalizeGutter(selectedChecker, playerColor) + die * direction[playerColor], playerColor));
+    const isPlayerBlack = playerColor === 'black';
+    const isPlayerWhite = playerColor === 'white';
+    const bar = gameState.state.bar;
+    const isAllowed = (v: number) => contains(allowedPoints, v);
 
     return (
         <div className="PlayBackgammon">
-            <svg style={{ width: 'calc(100vw - 20px)', height: 'calc(100vh - 20px)', ...filtersVariables() }}
-                viewBox={`0 0 ${boardWidth} ${boardHeight}`}
+            <svg style={filtersVariables()}
+                viewBox={boardPositions.viewbox}
                 preserveAspectRatio="xMidYMid meet">
                 <Filters />
-                <g transform={playerColor === 'white' ? `translate(${boardWidth},${boardHeight}) rotate(180)` : undefined}>
+                <g transform={isPlayerWhite ? boardPositions.whiteRotation : boardPositions.blackRotation}>
                     <Board />
-                    <HomeArea selectable={contains(allowedPoints, homeValue)} onClick={doBearOff} />
+                    <HomeArea selectable={isAllowed(homeValue)} onClick={doBearOff} />
                     {gameState.state.currentPlayer && gameState.state.points.map(({ black, white }, idx) =>
                         <g transform={pointTransform(idx)} key={idx}>
-                            <Checkers count={black} player="black" selectable={selectedChecker === null && playerColor === 'black' && !canRoll} selected={selectedChecker === idx}
-                                onClick={(selectedChecker === null && playerColor === 'black' && !canRoll && black) ? (() => setSelectedChecker(idx)) : () => selectPoint(idx)} />
-                            <Checkers count={white} player="white" selectable={selectedChecker === null && playerColor === 'white' && !canRoll} selected={selectedChecker === idx}
-                                onClick={(selectedChecker === null && playerColor === 'white' && !canRoll && white) ? (() => setSelectedChecker(idx)) : () => selectPoint(idx)} />
+                            <Checkers count={black} player="black" selectable={canSelectChecker && isPlayerBlack} selected={selectedChecker === idx}
+                                onClick={() => (canSelectChecker && isPlayerBlack) ? setSelectedChecker(idx) : selectPoint(idx)} />
+                            <Checkers count={white} player="white" selectable={canSelectChecker && isPlayerWhite} selected={selectedChecker === idx}
+                                onClick={() => (canSelectChecker && isPlayerWhite) ? setSelectedChecker(idx) : selectPoint(idx)} />
                             {selectedChecker !== null
-                                ? <Point color="transparent" selectable={contains(allowedPoints, idx)} onClick={() => selectPoint(idx)} />
+                                ? <Point color="transparent" selectable={isAllowed(idx)} onClick={() => selectPoint(idx)} />
                                 : null
                             }
                         </g>
                     )}
-                    <g transform={`translate(${boardWidth / 2}, ${boardHeight / 2}) rotate(180)`}>
-                        <Checkers count={gameState.state.bar.black} player="black" selectable={selectedChecker === null && playerColor === 'black' && !canRoll} selected={playerColor === 'black' && selectedChecker === barValue}
-                                onClick={(selectedChecker === null && playerColor === 'black' && !canRoll && gameState.state.bar.black) ? (() => setSelectedChecker(barValue)) : (() => setSelectedChecker(null))} />
+                    <g transform={boardPositions.blackBar}>
+                        <Checkers count={bar.black} player="black" selectable={canSelectChecker && isPlayerBlack} selected={isPlayerBlack && selectedChecker === barValue}
+                                onClick={() => (canSelectChecker && isPlayerBlack) ? setSelectedChecker(barValue) : setSelectedChecker(null)} />
                     </g>
-                    <g transform={`translate(${boardWidth / 2}, ${boardHeight / 2})`}>
-                        <Checkers count={gameState.state.bar.white} player="white" selectable={selectedChecker === null && playerColor === 'white' && !canRoll} selected={playerColor === 'white' && selectedChecker === barValue}
-                                onClick={(selectedChecker === null && playerColor === 'white' && !canRoll && gameState.state.bar.white) ? (() => setSelectedChecker(barValue)) : (() => setSelectedChecker(null))} />
+                    <g transform={boardPositions.whiteBar}>
+                        <Checkers count={bar.white} player="white" selectable={canSelectChecker && isPlayerWhite} selected={isPlayerWhite && selectedChecker === barValue}
+                                onClick={() => (canSelectChecker && isPlayerWhite) ? setSelectedChecker(barValue) : setSelectedChecker(null)} />
                     </g>
 
-                    <g transform={`translate(${boardWidth / 4}, ${boardHeight / 2})`}>
+                    <g transform={boardPositions.whiteDice}>
                         <Dice player="white" values={gameState.state.diceRolls.white} />
                     </g>
-                    <g transform={`translate(${boardWidth * 3 / 4}, ${boardHeight / 2})`}>
+                    <g transform={boardPositions.blackDice}>
                         <Dice player="black" values={gameState.state.diceRolls.black} />
                     </g>
                 </g>
