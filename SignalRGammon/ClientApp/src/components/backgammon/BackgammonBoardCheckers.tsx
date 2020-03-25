@@ -58,13 +58,15 @@ export function BackgammonBoardCheckers({ canRoll, state }: {
     return (
         <>
             <HomeArea selectable={isAllowed(homeValue)} onClick={doBearOff} />
-            {state.currentPlayer && state.points.map(({ black, white }, idx) => <g transform={pointTransform(idx)} key={idx}>
-                <Checkers count={black} player="black" selectable={canSelectChecker && isPlayerBlack} selected={selectedChecker === idx} onClick={() => (canSelectChecker && isPlayerBlack) ? setSelectedChecker(idx) : selectPoint(idx)} />
-                <Checkers count={white} player="white" selectable={canSelectChecker && isPlayerWhite} selected={selectedChecker === idx} onClick={() => (canSelectChecker && isPlayerWhite) ? setSelectedChecker(idx) : selectPoint(idx)} />
-                {selectedChecker !== null
-                    ? <Point color="transparent" selectable={isAllowed(idx)} onClick={() => selectPoint(idx)} />
-                    : null}
-            </g>)}
+            {state.currentPlayer && state.points.map(({ black, white }, idx) =>
+                <g transform={pointTransform(idx)} key={idx}>
+                    <Checkers count={black} player="black" selectable={canSelectChecker && isPlayerBlack} selected={selectedChecker === idx} onClick={() => (canSelectChecker && isPlayerBlack) ? setSelectedChecker(idx) : selectPoint(idx)} />
+                    <Checkers count={white} player="white" selectable={canSelectChecker && isPlayerWhite} selected={selectedChecker === idx} onClick={() => (canSelectChecker && isPlayerWhite) ? setSelectedChecker(idx) : selectPoint(idx)} />
+                    {selectedChecker !== null
+                        ? <Point color="transparent" selectable={isAllowed(idx)} onClick={() => selectPoint(idx)} />
+                        : null}
+                </g>
+            )}
             <g transform={boardPositions.blackBar}>
                 <Checkers count={bar.black} player="black" selectable={canSelectChecker && isPlayerBlack} selected={isPlayerBlack && selectedChecker === barValue} onClick={() => (canSelectChecker && isPlayerBlack) ? setSelectedChecker(barValue) : setSelectedChecker(null)} />
             </g>

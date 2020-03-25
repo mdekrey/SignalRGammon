@@ -24,8 +24,13 @@ export function Checkers({ count, player, selectable = false, selected = false, 
     </g>);
 }
 
+
 function checkerTranslation(idx: number, count: number) {
-    return `translate(0 ${checkerFactor(idx, count) * checkerDiameter})`;
+    return `translate(0 ${checkerDistanceFromWall(idx, count)})`;
+}
+
+function checkerDistanceFromWall(idx: number, count: number) {
+    return checkerFactor(idx, count) * checkerDiameter;
 }
 
 const checkersMaxCount = 5;

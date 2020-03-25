@@ -3,22 +3,22 @@ import { checkerRadius, pointBasePct, boardHeight, pointHeightPct, checkerDiamet
 
 import "./styles.css";
 
-const pointPosition = (index: number) => {
+export function pointPosition(index: number) {
     if (index < 6) {
-        return { x: anchorRight - checkerDiameter * (0.5 + index), y: anchorBottom, rotation: 180 };
+        return { x: anchorRight - checkerDiameter * (0.5 + index), y: anchorBottom, reverse: true };
     } else if (index < 12) {
-        return { x: anchorLeft + checkerDiameter * (0.5 + 11 - index), y: anchorBottom, rotation: 180 };
+        return { x: anchorLeft + checkerDiameter * (0.5 + 11 - index), y: anchorBottom, reverse: true };
     } else if (index < 18) {
-        return { x: anchorLeft + checkerDiameter * (0.5 + index - 12), y: anchorTop, rotation: 0 };
+        return { x: anchorLeft + checkerDiameter * (0.5 + index - 12), y: anchorTop, reverse: false };
     } else if (index < 24) {
-        return { x: anchorRight - checkerDiameter * (0.5 + 23 - index), y: anchorTop, rotation: 0 };
+        return { x: anchorRight - checkerDiameter * (0.5 + 23 - index), y: anchorTop, reverse: false };
     }
     throw new Error("Invalid index " + index);
 }
 
 export const pointTransform = (index: number) => {
-    const { x, y, rotation } = pointPosition(index);
-    return `translate(${x}, ${y}) rotate(${rotation})`;
+    const { x, y, reverse } = pointPosition(index);
+    return `translate(${x}, ${y}) rotate(${reverse ? 180 : 0})`;
 }
 
 export type PointProps = {
