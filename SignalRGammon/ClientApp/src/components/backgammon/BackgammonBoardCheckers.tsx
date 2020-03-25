@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useBackgammon } from './BackgammonService';
-import { boardPositions } from './svg-parts/sizes';
 import { pointTransform, Point } from './svg-parts/Point';
-import { Checkers, checkerTranslation } from './svg-parts/Checkers';
+import { Checkers, fullCheckerTranslation } from './svg-parts/Checkers';
 import { HomeArea } from './svg-parts/HomeArea';
 import { BackgammonState } from './BackgammonState';
 import { bar, home, Checkers as CheckersData, players } from './pointsToCheckers';
@@ -70,18 +69,24 @@ export function BackgammonBoardCheckers({ canRoll, state, checkers, diceRolls }:
                         : null}
                 </g>
             )}
-            <g transform={boardPositions.blackBar}>
-                <Checkers count={state.bar.black} player="black" selectable={canSelectChecker && isPlayerBlack} selected={isPlayerBlack && selectedChecker === barValue} onClick={() => (canSelectChecker && isPlayerBlack) ? setSelectedChecker(barValue) : setSelectedChecker(null)} />
-            </g>
-            <g transform={boardPositions.whiteBar}>
-                <Checkers count={state.bar.white} player="white" selectable={canSelectChecker && isPlayerWhite} selected={isPlayerWhite && selectedChecker === barValue} onClick={() => (canSelectChecker && isPlayerWhite) ? setSelectedChecker(barValue) : setSelectedChecker(null)} />
-            </g>
             {players.map(player =>
-                checkers[player].map(checker => (
-                    <g style={{ transition: "transform 1s" }} transform={` ${pointTransform(checker.location, player)} ${checkerTranslation(checker.indexInLocation, checker.ofCount)}`} key={checker.id}>
-                        <Checker player={player} />
-                    </g>
-            )))}
+                <g transform={pointTransform(bar, player)} key={player}>
+                    <Checkers
+                        count={state.bar[player]} player={player}
+                        selectable={canSelectChecker && playerColor === player}
+                        selected={playerColor === player && selectedChecker === barValue}
+                        onClick={() => (canSelectChecker && playerColor === player) ? setSelectedChecker(barValue) : setSelectedChecker(null)} />
+                </g>
+            )}
+            {players.map(player =>
+                <React.Fragment key={player}>
+                    {checkers[player].map(checker => (
+                        <g style={{ transition: "transform 1s" }} transform={fullCheckerTranslation(checker.indexInLocation, checker.ofCount, checker.location, player)} key={checker.id}>
+                            <Checker player={player} />
+                        </g>
+                    ))}
+                </React.Fragment>
+            )}
         </>
     );
 

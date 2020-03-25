@@ -4,7 +4,16 @@ import { checkerRadius, pointBasePct, boardHeight, pointHeightPct, checkerDiamet
 import "./styles.css";
 import { bar, home } from '../pointsToCheckers';
 
-export function pointPosition(index: number) {
+
+export function pointPosition(index: number): { x: number, y: number, reverse: boolean};
+export function pointPosition(index: number | bar | home, player: 'white' | 'black'): { x: number, y: number, reverse: boolean};
+export function pointPosition(index: number | bar | home, player: 'white' | 'black' = 'white') {
+    if (index === home) {
+        throw new Error("Home not yet rendered");
+    }
+    if (index === bar) {
+        return player === 'black' ? boardPositions.blackBar : boardPositions.whiteBar;
+    }
     if (index < 6) {
         return { x: anchorRight - checkerDiameter * (0.5 + index), y: anchorBottom, reverse: true };
     } else if (index < 12) {
@@ -20,13 +29,7 @@ export function pointPosition(index: number) {
 export function pointTransform(index: number): string;
 export function pointTransform(index: number | bar | home, player: 'white' | 'black'): string;
 export function pointTransform(index: number | bar | home, player: 'white' | 'black' = 'white') {
-    if (index === bar) {
-        return player === 'black' ? boardPositions.blackBar : boardPositions.whiteBar;
-    }
-    if (index === home) {
-        return ''; // TODO
-    }
-    const { x, y, reverse } = pointPosition(index);
+    const { x, y, reverse } = pointPosition(index, player);
     return `translate(${x}, ${y}) rotate(${reverse ? 180 : 0})`;
 }
 

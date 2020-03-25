@@ -31,8 +31,8 @@ export const boardPositions = Object.freeze({
     viewbox: `0 0 ${boardWidth} ${boardHeight}`,
     blackRotation: undefined,
     whiteRotation: `translate(${boardWidth},${boardHeight}) rotate(180)`,
-    blackBar: `translate(${boardWidth / 2}, ${boardHeight / 2}) rotate(180)`,
-    whiteBar: `translate(${boardWidth / 2}, ${boardHeight / 2})`,
+    blackBar: { x: boardWidth / 2, y: boardHeight / 2, reverse: true },
+    whiteBar: { x: boardWidth / 2, y: boardHeight / 2, reverse: false },
     whiteDice: `translate(${boardWidth / 4}, ${boardHeight / 2})`,
     blackDice: `translate(${boardWidth * 3 / 4}, ${boardHeight / 2})`,
 });

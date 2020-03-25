@@ -103,5 +103,6 @@ function doAdjustment(points: PerPlayer<Points>, state: BackgammonState, player:
         }
     }
 
+    checkers.sort((a, b) => a.id.localeCompare(b.id));
     return { checkers, changed };
 }

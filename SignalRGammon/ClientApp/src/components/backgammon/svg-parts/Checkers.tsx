@@ -2,6 +2,8 @@ import React from 'react';
 import { checkerDiameter, checkerRadius } from './sizes';
 import { Checker } from './Checker';
 import { arrayOf } from '../../../utils/arrayOf';
+import { bar, home } from '../pointsToCheckers';
+import { pointPosition } from './Point';
 
 export type CheckersProps = {
     count: number;
@@ -24,6 +26,15 @@ export function Checkers({ count, player, selectable = false, selected = false, 
     </g>);
 }
 
+
+export function fullCheckerTranslation(checkerIdx: number, count: number, index: number): string;
+export function fullCheckerTranslation(checkerIdx: number, count: number, index: number | bar | home, player: 'white' | 'black'): string;
+export function fullCheckerTranslation(checkerIdx: number, count: number, index: number | bar | home, player: 'white' | 'black' = 'white') {
+    const wallDist = checkerDistanceFromWall(checkerIdx, count);
+    const { x, y, reverse } = pointPosition(index, player);
+
+    return `translate(${x} ${y + (reverse ? -1 : 1) * wallDist})`;
+}
 
 export function checkerTranslation(idx: number, count: number) {
     return `translate(0 ${checkerDistanceFromWall(idx, count)})`;
