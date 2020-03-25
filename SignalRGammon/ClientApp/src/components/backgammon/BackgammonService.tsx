@@ -1,20 +1,23 @@
 import React, { useContext, createContext, useMemo, useCallback } from "react";
 import { Observable, from } from "rxjs";
-import { switchMap, map } from "rxjs/operators";
+import { switchMap, map, scan } from "rxjs/operators";
 import { useGameConnection } from "../../services/gameConnectionContext";
 import { fromSignalR } from "../../utils/fromSignalR";
 import { BackgammonState } from "./BackgammonState";
 import { useRouteMatch } from "react-router";
+import { bar, Checkers, pointsToCheckers } from "./pointsToCheckers";
 
 export type BackgammonAction = {
     // TODO
 };
 
+export type ObservedState = { state: BackgammonState, action: BackgammonAction, checkers: Checkers };
+
 export type BackgammonContextResult = {
-    state: Observable<{ state: BackgammonState, action: BackgammonAction } | null>
+    state: Observable<ObservedState | null>
     roll: () => Promise<boolean>
-    move: (dieValue: number, startingPointIndex: number) => Promise<boolean>
-    bearOff: (dieValue: number, startingPointIndex: number) => Promise<boolean>
+    move: (dieValue: number, startingPointIndex: number | bar) => Promise<boolean>
+    bearOff: (dieValue: number, startingPointIndex: number | bar) => Promise<boolean>
     newGame: () => Promise<boolean>
     undo: () => Promise<boolean>
     otherPlayerUrl: string
@@ -42,14 +45,14 @@ export function BackgammonScope({ gameId, playerColor, children }: BackgammonSco
         return await connection.invoke<boolean>('Do', gameId, JSON.stringify({ type: 'roll', player: playerColor }));
     }, [connected, connection, playerColor, gameId])
 
-    const move = useCallback(async (dieValue: number, startingPointIndex: number) => {
+    const move = useCallback(async (dieValue: number, startingPoint: number | bar) => {
         await connected;
-        return await connection.invoke<boolean>('Do', gameId, JSON.stringify({ type: 'move', player: playerColor, dieValue, startingPointNumber: startingPointIndex }));
+        return await connection.invoke<boolean>('Do', gameId, JSON.stringify({ type: 'move', player: playerColor, dieValue, startingPointNumber: startingPoint === bar ? -1 : startingPoint }));
     }, [connected, connection, playerColor, gameId])
 
-    const bearOff = useCallback(async (dieValue: number, startingPointIndex: number) => {
+    const bearOff = useCallback(async (dieValue: number, startingPoint: number | bar) => {
         await connected;
-        return await connection.invoke<boolean>('Do', gameId, JSON.stringify({ type: 'bear-off', player: playerColor, dieValue, startingPointNumber: startingPointIndex }));
+        return await connection.invoke<boolean>('Do', gameId, JSON.stringify({ type: 'bear-off', player: playerColor, dieValue, startingPointNumber: startingPoint === bar ? -1 : startingPoint }));
     }, [connected, connection, playerColor, gameId])
 
     const newGame = useCallback(async () => {
@@ -65,7 +68,14 @@ export function BackgammonScope({ gameId, playerColor, children }: BackgammonSco
     const state = useMemo(() => from(connected)
         .pipe(
             switchMap(() => fromSignalR(connection.stream('ListenState', gameId))),
-            map(json => JSON.parse(json))
+            map(json => JSON.parse(json) as { state: BackgammonState, action: BackgammonAction }),
+            scan(
+                (prev, { state, action }) =>
+                    prev
+                        ? ({ state, action, checkers: pointsToCheckers(state, prev.checkers) })
+                        : ({ state, action, checkers: pointsToCheckers(state) }) ,
+                null as ObservedState | null
+            )
         ), [connection, connected, gameId]);
     const value = useMemo(() => ({
         state,

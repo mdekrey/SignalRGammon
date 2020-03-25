@@ -29,6 +29,8 @@ export function PlayBackgammonComponent() {
         );
     }
 
+    console.log(gameState.checkers);
+
     const canRoll = !gameState.state.winner && gameState.state.diceRolls[playerColor].length === 0
         && (gameState.state.currentPlayer === null || gameState.state.currentPlayer === playerColor);
     const isWaiting = !gameState.state.winner && !canRoll && gameState.state.currentPlayer !== playerColor;
@@ -42,7 +44,7 @@ export function PlayBackgammonComponent() {
                 <Filters />
                 <g transform={playerColor === 'white' ? boardPositions.whiteRotation : boardPositions.blackRotation}>
                     <Board />
-                    <BackgammonBoardCheckers canRoll={canRoll} state={gameState.state} />
+                    {gameState.state.currentPlayer && <BackgammonBoardCheckers canRoll={canRoll} state={gameState.state} checkers={gameState.checkers} diceRolls={gameState.state.diceRolls} />}
 
                     <g transform={boardPositions.whiteDice}>
                         <Dice player="white" values={gameState.state.diceRolls.white} />

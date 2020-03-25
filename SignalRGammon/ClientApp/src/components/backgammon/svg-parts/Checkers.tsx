@@ -25,7 +25,7 @@ export function Checkers({ count, player, selectable = false, selected = false, 
 }
 
 
-function checkerTranslation(idx: number, count: number) {
+export function checkerTranslation(idx: number, count: number) {
     return `translate(0 ${checkerDistanceFromWall(idx, count)})`;
 }
 

@@ -1,7 +1,8 @@
 import React from 'react';
-import { checkerRadius, pointBasePct, boardHeight, pointHeightPct, checkerDiameter, anchorRight, anchorBottom, anchorLeft, anchorTop } from './sizes';
+import { checkerRadius, pointBasePct, boardHeight, pointHeightPct, checkerDiameter, anchorRight, anchorBottom, anchorLeft, anchorTop, boardPositions } from './sizes';
 
 import "./styles.css";
+import { bar, home } from '../pointsToCheckers';
 
 export function pointPosition(index: number) {
     if (index < 6) {
@@ -16,7 +17,15 @@ export function pointPosition(index: number) {
     throw new Error("Invalid index " + index);
 }
 
-export const pointTransform = (index: number) => {
+export function pointTransform(index: number): string;
+export function pointTransform(index: number | bar | home, player: 'white' | 'black'): string;
+export function pointTransform(index: number | bar | home, player: 'white' | 'black' = 'white') {
+    if (index === bar) {
+        return player === 'black' ? boardPositions.blackBar : boardPositions.whiteBar;
+    }
+    if (index === home) {
+        return ''; // TODO
+    }
     const { x, y, reverse } = pointPosition(index);
     return `translate(${x}, ${y}) rotate(${reverse ? 180 : 0})`;
 }
