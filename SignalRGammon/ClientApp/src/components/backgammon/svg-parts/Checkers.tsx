@@ -1,31 +1,35 @@
 import React from 'react';
-import { checkerDiameter, checkerRadius } from './sizes';
-import { Checker } from './Checker';
-import { arrayOf } from '../../../utils/arrayOf';
+import { checkerDiameter, checkerRadius, stroke } from './sizes';
 import { bar, home } from '../pointsToCheckers';
 import { pointPosition } from './Point';
 
 export type CheckersProps = {
     count: number;
-    player: 'black' | 'white' | 'transparent';
     selectable?: boolean;
     selected?: boolean;
     onClick?: () => void;
 };
 
-export function Checkers({ count, player, selectable = false, selected = false, onClick }: CheckersProps) {
+const CheckerGlow = ({ selectable = false, selected = false }: { selectable?: boolean, selected?: boolean }) =>
+    <g className={`checker transparent ${selectable ? 'selectable' : ''} ${selected ? 'selected' : ''}`}>
+        <circle r={checkerRadius * 0.95} className="glow hitbox" strokeWidth={stroke} />
+    </g>;
+
+export function Checkers({ count, selectable = false, selected = false, onClick }: CheckersProps) {
     if (!count)
         return null;
     if (!selectable && !selected)
         return null;
-    return (<g className={selectable ? "selectable-container" : undefined} onClick={onClick}>
-        <g transform={checkerTranslation(count - 1, count)}>
-            <Checker player={player} selectable={selectable} selected={selected} />
+    return (
+        <g className={selectable ? "selectable-container" : undefined} onClick={onClick}>
+            <g transform={checkerTranslation(count - 1, count)}>
+                <CheckerGlow selectable={selectable} selected={selected} />
+            </g>
+            {selectable
+                ? <rect x={-checkerRadius} y={0} width={checkerDiameter} height={checkerDiameter * checkersMaxCount} fill="transparent" />
+                : null}
         </g>
-        {selectable
-            ? <rect x={-checkerRadius} y={0} width={checkerDiameter} height={checkerDiameter * checkersMaxCount} fill="transparent" />
-            : null}
-    </g>);
+    );
 }
 
 
@@ -35,7 +39,7 @@ export function fullCheckerTranslation(checkerIdx: number, count: number, index:
     const wallDist = checkerDistanceFromWall(checkerIdx, count);
     const { x, y, reverse } = pointPosition(index, player);
 
-    return `translate(${x} ${y + (reverse ? -1 : 1) * wallDist})`;
+    return `translate(${x}px, ${y + (reverse ? -1 : 1) * wallDist}px)`;
 }
 
 export function checkerTranslation(idx: number, count: number) {

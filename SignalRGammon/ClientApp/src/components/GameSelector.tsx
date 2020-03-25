@@ -6,7 +6,10 @@ export function GameSelector(props: { children?: never }) {
     return (
         <>
             <div>
-                <Link to="/backgammon">Backgammon</Link>
+                <Link to="/backgammon">
+                    <img src={require('./backgammon/backgammon.svg')} title="Backgammon" alt="Backgammon" />
+                    Backgammon
+                </Link>
             </div>
             <hr/>
             <div>

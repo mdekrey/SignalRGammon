@@ -57,22 +57,23 @@ export function BackgammonBoardCheckers({ canRoll, state, checkers, diceRolls }:
 
     return (
         <>
-            <HomeArea selectable={isAllowed(homeValue)} onClick={doBearOff} />
+            {/* Rendered checkers */}
             {players.map(player =>
                 <React.Fragment key={player}>
                     {checkers[player].map(checker => (
-                        <g style={{ transition: "transform 1s", pointerEvents: "none" }} transform={fullCheckerTranslation(checker.indexInLocation, checker.ofCount, checker.location, player)} key={checker.id}>
+                        <g style={{ transition: "transform 1s", pointerEvents: "none", transform: fullCheckerTranslation(checker.indexInLocation, checker.ofCount, checker.location, player)}} key={checker.id}>
                             <Checker player={player} />
                         </g>
                     ))}
                 </React.Fragment>
             )}
+            {/* Hitbox section */}
+            <HomeArea selectable={isAllowed(homeValue)} onClick={doBearOff} />
             {state.points.map((point, idx) =>
                 <g transform={pointTransform(idx)} key={idx}>
                     {players.map(player =>
                         <Checkers key={player}
                                   count={point[player]}
-                                  player="transparent"
                                   selectable={canSelectChecker && playerColor === player}
                                   selected={selectedChecker === idx}
                                   onClick={() => (canSelectChecker && playerColor === player) ? setSelectedChecker(idx) : selectPoint(idx)} />
@@ -85,7 +86,7 @@ export function BackgammonBoardCheckers({ canRoll, state, checkers, diceRolls }:
             {players.map(player =>
                 <g transform={pointTransform(bar, player)} key={player}>
                     <Checkers
-                        count={state.bar[player]} player={"transparent"}
+                        count={state.bar[player]}
                         selectable={canSelectChecker && playerColor === player}
                         selected={playerColor === player && selectedChecker === barValue}
                         onClick={() => (canSelectChecker && playerColor === player) ? setSelectedChecker(barValue) : setSelectedChecker(null)} />
