@@ -11,6 +11,7 @@ namespace SignalRGammon
             return gameType switch
             {
                 "backgammon" => new Backgammon.BackgammonGame(new DieRoller()),
+                "checkers" => new Checkers.CheckersGame(),
                 _ => throw new NotImplementedException()
             };
         }
