@@ -89,10 +89,10 @@ namespace SignalRGammon.Backgammon
             return validStartingPoints;
         }
 
-        public (BackgammonState, bool) ApplyAction(BackgammonState state, BackgammonAction action)
+        public (BackgammonState, bool) ApplyAction(BackgammonState state, BackgammonAction? action)
         {
             if (action == null)
-                throw new ArgumentNullException(nameof(action));
+                return (state, false);
             switch (state)
             {
                 case null:
