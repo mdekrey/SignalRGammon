@@ -1,4 +1,4 @@
-﻿namespace SignalRGammon
+﻿namespace SignalRGammon.GameUtilities
 {
     public interface IGameFactory
     {

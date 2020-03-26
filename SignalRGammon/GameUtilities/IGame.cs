@@ -3,7 +3,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace SignalRGammon
+namespace SignalRGammon.GameUtilities
 {
     public interface IGame
     {
