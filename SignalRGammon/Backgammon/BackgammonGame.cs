@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using SignalRGammon.GameUtilities;
 
 namespace SignalRGammon.Backgammon
 {
@@ -23,15 +24,16 @@ namespace SignalRGammon.Backgammon
                 NamingStrategy = new CamelCaseNamingStrategy(),
             },
         };
-
+        private readonly Rules rules;
         private readonly BehaviorSubject<(BackgammonState state, BackgammonAction? action)> state;
 
         public BackgammonGame(IDieRoller dieRoller)
         {
-            state = new BehaviorSubject<(BackgammonState state, BackgammonAction? action)>((BackgammonState.DefaultState(dieRoller), null));
+            rules = new Rules(dieRoller);
+            state = new BehaviorSubject<(BackgammonState state, BackgammonAction? action)>((BackgammonState.DefaultState(), null));
             States = state.Replay(1).RefCount();
 
-            States.Select(s => s.state).Select(s => Observable.FromAsync(() => Rules.CheckAutomaticActions(s, Do))).Concat().Subscribe();
+            States.Select(s => s.state).Select(s => Observable.FromAsync(() => rules.CheckAutomaticActions(s, Do))).Concat().Subscribe();
         }
 
         public JsonSerializerSettings JsonSettings => BackgammonJsonSettings;
@@ -45,7 +47,7 @@ namespace SignalRGammon.Backgammon
             if (action == null)
                 return false;
             await Task.Yield();
-            var (next, valid) = state.Value.state.ApplyAction(action);
+            var (next, valid) = rules.ApplyAction(state.Value.state, action);
             if (valid)
             {
                 state.OnNext((next, action));

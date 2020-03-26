@@ -1,4 +1,5 @@
 ﻿using SignalRGammon.Backgammon;
+using SignalRGammon.GameUtilities;
 using System;
 
 namespace SignalRGammon

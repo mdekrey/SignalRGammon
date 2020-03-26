@@ -20,7 +20,6 @@ namespace SignalRGammon
         JsonSerializerSettings JsonSettings { get; }
 
         IObservable<string> IGame.JsonStates =>
-
             States
                 .Select(s => JsonConvert.SerializeObject(new { s.state, s.action }, JsonSettings));
 

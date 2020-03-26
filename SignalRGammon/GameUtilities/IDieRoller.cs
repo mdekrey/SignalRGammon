@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SignalRGammon.Backgammon
+namespace SignalRGammon.GameUtilities
 {
     public interface IDieRoller
     {

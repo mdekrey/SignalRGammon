@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SignalRGammon.GameUtilities;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -11,9 +12,16 @@ namespace SignalRGammon.Backgammon
     using PointState = PlayerState<int>;
     using ActionDispatcher = Func<BackgammonAction, Task<bool>>;
 
-    public static class Rules
+    public class Rules
     {
-        public static async Task CheckAutomaticActions(BackgammonState state, ActionDispatcher dispatch)
+        private readonly IDieRoller dieRoller;
+
+        public Rules(IDieRoller dieRoller)
+        {
+            this.dieRoller = dieRoller;
+        }
+
+        public async Task CheckAutomaticActions(BackgammonState state, ActionDispatcher dispatch)
         {
             try
             {
@@ -36,7 +44,7 @@ namespace SignalRGammon.Backgammon
             }
         }
 
-        private static async Task CheckForWinner(BackgammonState state, ActionDispatcher dispatch)
+        private async Task CheckForWinner(BackgammonState state, ActionDispatcher dispatch)
         {
             if (state.Points.All(p => p.White == 0))
             {
@@ -48,7 +56,7 @@ namespace SignalRGammon.Backgammon
             }
         }
 
-        private static async Task DoInvalidDieRolls(BackgammonState state, ActionDispatcher dispatch)
+        private async Task DoInvalidDieRolls(BackgammonState state, ActionDispatcher dispatch)
         {
             if (!(state.CurrentPlayer is Player player))
                 return;
@@ -67,7 +75,7 @@ namespace SignalRGammon.Backgammon
             // We can't really remove other dice due to it maybe becoming valid in a different order; we'd have to disable dice in the first round, which isn't exactly something currently in the state machine...
         }
 
-        static IEnumerable<BackgammonState> ValidStates(BackgammonState obj, int dieRoll)
+        IEnumerable<BackgammonState> ValidStates(BackgammonState obj, int dieRoll)
         {
             var validStartingPoints = (from idx in Range(-1, 25)
                                        from tuple in new (BackgammonAction action, int idx)[]
@@ -75,13 +83,13 @@ namespace SignalRGammon.Backgammon
                                            (new BackgammonMove { DieValue = dieRoll, Player = obj.CurrentPlayer.Value, StartingPointNumber = idx }, idx),
                                            (new BackgammonBearOff { DieValue = dieRoll, Player = obj.CurrentPlayer.Value, StartingPointNumber = idx }, idx),
                                        }
-                                       let applied = obj.ApplyAction(tuple.action)
+                                       let applied = ApplyAction(obj, tuple.action)
                                        where applied.Item2
                                        select applied.Item1).ToArray();
             return validStartingPoints;
         }
 
-        public static (BackgammonState, bool) ApplyAction(this BackgammonState state, BackgammonAction action)
+        public (BackgammonState, bool) ApplyAction(BackgammonState state, BackgammonAction action)
         {
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
@@ -94,43 +102,53 @@ namespace SignalRGammon.Backgammon
                         return (state, false);
                     return (state.DiceRolls.White[0], state.DiceRolls.Black[0]) switch
                     {
-                        (int white, int black) when white < black => (state.With(null, CurrentPlayer: Player.Black, DiceRolls: Defaults.EmptyDiceRolls.With(Player.Black, new[] { black, white })), true),
-                        (int white, int black) when white > black => (state.With(null, CurrentPlayer: Player.White, DiceRolls: Defaults.EmptyDiceRolls.With(Player.White, new[] { white, black })), true),
-                        _ => (DefaultState(state.DieRoller), true),
+                        (int white, int black) when white == black => (DefaultState(), true),
+                        (int white, int black) => (
+                            state.With(
+                                null, 
+                                CurrentPlayer: white < black ? Player.Black : Player.White,
+                                DiceRolls: Defaults.EmptyDiceRolls.With(white < black ? Player.Black : Player.White, new[] { black, white })
+                            ),
+                            true
+                        )
                     };
                 case { Winner: null, CurrentPlayer: null }:
                     return action switch
                     {
-                        BackgammonDiceRoll { Player: var player } when state.DiceRolls[player].Count == 0 => (state.With(null, DiceRolls: state.DiceRolls.With(player, new[] { state.DieRoller.RollDie() })), true),
+                        BackgammonDiceRoll { Player: var player } when state.DiceRolls[player].Count == 0 => (state.With(null, DiceRolls: state.DiceRolls.With(player, new[] { dieRoller.RollDie() })), true),
                         _ => (state, false)
                     };
                 case { Winner: null, CurrentPlayer: Player currentPlayer }:
                     return action switch
                     {
-                        BackgammonDiceRoll { Player: var actingPlayer } when actingPlayer == currentPlayer && state.DiceRolls[currentPlayer].Count == 0 => (state.With(null, DiceRolls: Defaults.EmptyDiceRolls.With(currentPlayer, state.DieRoller.RollDiceWithDoubles())), true),
-                        BackgammonMove { Player: var actingPlayer, DieValue: var dieValue, StartingPointNumber: var startingPoint } when actingPlayer == currentPlayer && state.DiceRolls[currentPlayer].Contains(dieValue) =>
-                            state.HandleMove(dieValue, startingPoint),
-                        BackgammonBearOff { Player: var actingPlayer, DieValue: var dieValue, StartingPointNumber: var startingPoint } when actingPlayer == currentPlayer && state.DiceRolls[currentPlayer].Contains(dieValue) =>
-                            state.HandleBearOff(dieValue, startingPoint),
+                        BackgammonDiceRoll { Player: var actingPlayer } 
+                            when actingPlayer == currentPlayer && state.DiceRolls[currentPlayer].Count == 0 => 
+                                (state.With(null, DiceRolls: Defaults.EmptyDiceRolls.With(currentPlayer, RollDiceWithDoubles())), true),
+                        BackgammonMove { Player: var actingPlayer, DieValue: var dieValue, StartingPointNumber: var startingPoint } 
+                            when actingPlayer == currentPlayer && state.DiceRolls[currentPlayer].Contains(dieValue) =>
+                                HandleMove(state, dieValue, startingPoint),
+                        BackgammonBearOff { Player: var actingPlayer, DieValue: var dieValue, StartingPointNumber: var startingPoint } 
+                            when actingPlayer == currentPlayer && state.DiceRolls[currentPlayer].Contains(dieValue) =>
+                                HandleBearOff(state, dieValue, startingPoint),
                         BackgammonUndo _ when state.Undo != null =>
                             (state.Undo, true),
                         BackgammonCannotUseRoll { DieValues: var dieValues } =>
-                            state.RevokeDieRoll(dieValues),
+                            RevokeDieRoll(state, dieValues),
                         BackgammonDeclareWinner { Player: var player } =>
-                            state.DeclareWinner(player),
+                            DeclareWinner(state, player),
                         _ => (state, false)
                     };
                 case { Winner: Player _ }:
                     return action switch
                     {
-                        BackgammonNewGame _ => (DefaultState(state.DieRoller), true),
+                        BackgammonNewGame _ => (DefaultState(), true),
                         _ => (state, false)
                     };
             }
         }
 
 
-        private static (BackgammonState, bool) HandleMove(this BackgammonState state, int dieValue, int startingPoint)
+        private (BackgammonState, bool) HandleMove(BackgammonState state, int dieValue, int startingPoint)
         {
             if (!state.CurrentPlayer.HasValue)
                 // Can only make a move on a player's turn
@@ -154,7 +172,7 @@ namespace SignalRGammon.Backgammon
                 // Used "move" to bear off.
                 return (state, false);
 
-            if (state.IsAnchor(actualEndPoint, otherPlayer))
+            if (IsAnchor(state, actualEndPoint, otherPlayer))
             {
                 // tried to move onto the other players' anchor
                 return (state, false);
@@ -191,7 +209,7 @@ namespace SignalRGammon.Backgammon
             );
         }
 
-        private static (BackgammonState, bool) HandleBearOff(this BackgammonState state, int dieValue, int startingPoint)
+        private (BackgammonState, bool) HandleBearOff(BackgammonState state, int dieValue, int startingPoint)
         {
             if (!state.CurrentPlayer.HasValue)
                 // Can only bear off on a player's turn
@@ -232,7 +250,7 @@ namespace SignalRGammon.Backgammon
             );
         }
 
-        private static (BackgammonState, bool) RevokeDieRoll(this BackgammonState state, IEnumerable<int> dieValues)
+        private (BackgammonState, bool) RevokeDieRoll(BackgammonState state, IEnumerable<int> dieValues)
         {
             if (!state.CurrentPlayer.HasValue)
                 // Can only revoke a roll on a player's turn
@@ -254,7 +272,7 @@ namespace SignalRGammon.Backgammon
             );
         }
 
-        private static (BackgammonState, bool) DeclareWinner(this BackgammonState state, Player player)
+        private (BackgammonState, bool) DeclareWinner(BackgammonState state, Player player)
         {
             if (!state.Points.All(p => p[player] == 0))
                 // Can only revoke a roll on a player's turn
@@ -269,7 +287,7 @@ namespace SignalRGammon.Backgammon
             );
         }
 
-        public static int GetEndPoint(Player player, int startingPoint, int dieValue)
+        public int GetEndPoint(Player player, int startingPoint, int dieValue)
         {
             var effectiveEndPoint = GetEffectiveEndPoint(player, startingPoint, dieValue);
             var actualEndPoint = effectiveEndPoint >= 24 ? 24 // not an end-point, but bearing-off
@@ -278,27 +296,27 @@ namespace SignalRGammon.Backgammon
             return actualEndPoint;
         }
 
-        private static int GetEffectiveEndPoint(Player player, int startingPoint, int dieValue)
+        private int GetEffectiveEndPoint(Player player, int startingPoint, int dieValue)
         {
             var effectiveStartPoint = GetEffectiveStartPoint(player, startingPoint);
             return effectiveStartPoint + dieValue;
         }
 
-        private static int GetEffectiveStartPoint(Player player, int startingPoint)
+        private int GetEffectiveStartPoint(Player player, int startingPoint)
         {
             return startingPoint == -1 ? -1
                    : player == Player.White ? 23 - startingPoint
                    : startingPoint;
         }
 
-        public static bool IsAnchor(this BackgammonState state, int actualEndPoint, Player player)
+        public bool IsAnchor(BackgammonState state, int actualEndPoint, Player player)
         {
             System.Diagnostics.Debug.Assert(actualEndPoint >= 0);
             System.Diagnostics.Debug.Assert(actualEndPoint < 24);
             return state.Points[actualEndPoint][player] > 1;
         }
 
-        private static IReadOnlyList<int> RollDiceWithDoubles(this IDieRoller dieRoller)
+        private IReadOnlyList<int> RollDiceWithDoubles()
         {
             return (dieRoller.RollDie(6), dieRoller.RollDie(6)) switch
             {

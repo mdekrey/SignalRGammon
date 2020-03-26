@@ -19,8 +19,10 @@ namespace SignalRGammon.Backgammon
         [Fact]
         public async Task CatchWhenNoMovesCanBeMadeByBlack()
         {
-            var state = BackgammonState.DefaultState(new FakeDieRoller())
+            var rules = new Rules(new FakeDieRoller());
+            var state = BackgammonState.DefaultState()
                 .With(
+                    null,
                     CurrentPlayer: Player.Black,
                     DiceRolls: new DiceState(Player.Black, new[] { 4, 5 }, Array.Empty<int>()),
                     Points: new[]
@@ -59,7 +61,7 @@ namespace SignalRGammon.Backgammon
                 actions.Add(arg);
                 return Task.FromResult(true);
             }
-            await Rules.CheckAutomaticActions(state, ExpectedDispatch);
+            await rules.CheckAutomaticActions(state, ExpectedDispatch);
 
             Assert.Collection(
                 actions,
@@ -77,8 +79,10 @@ namespace SignalRGammon.Backgammon
         [Fact]
         public async Task CatchWhenCannotMoveOffBarByBlack()
         {
-            var state = BackgammonState.DefaultState(new FakeDieRoller())
+            var rules = new Rules(new FakeDieRoller());
+            var state = BackgammonState.DefaultState()
                 .With(
+                    null,
                     CurrentPlayer: Player.Black,
                     DiceRolls: new DiceState(Player.Black, new[] { 6 }, Array.Empty<int>()),
                     Points: new[]
@@ -117,7 +121,7 @@ namespace SignalRGammon.Backgammon
                 actions.Add(arg);
                 return Task.FromResult(true);
             }
-            await Rules.CheckAutomaticActions(state, ExpectedDispatch);
+            await rules.CheckAutomaticActions(state, ExpectedDispatch);
 
             Assert.Collection(
                 actions,
@@ -134,8 +138,10 @@ namespace SignalRGammon.Backgammon
         [Fact]
         public async Task AllowValidMovesByBlack()
         {
-            var state = BackgammonState.DefaultState(new FakeDieRoller())
+            var rules = new Rules(new FakeDieRoller());
+            var state = BackgammonState.DefaultState()
                 .With(
+                    null,
                     CurrentPlayer: Player.Black,
                     DiceRolls: new DiceState(Player.Black, new[] { 4, 5 }, Array.Empty<int>()),
                     Points: new[]
@@ -174,7 +180,7 @@ namespace SignalRGammon.Backgammon
                 actions.Add(arg);
                 return Task.FromResult(true);
             }
-            await Rules.CheckAutomaticActions(state, ExpectedDispatch);
+            await rules.CheckAutomaticActions(state, ExpectedDispatch);
 
             Assert.Empty(actions);
         }
@@ -182,8 +188,10 @@ namespace SignalRGammon.Backgammon
         [Fact]
         public async Task AllowValidMovesByBlackInOrder()
         {
-            var state = BackgammonState.DefaultState(new FakeDieRoller())
+            var rules = new Rules(new FakeDieRoller());
+            var state = BackgammonState.DefaultState()
                 .With(
+                    null,
                     CurrentPlayer: Player.Black,
                     DiceRolls: new DiceState(Player.Black, new[] { 4, 5 }, Array.Empty<int>()),
                     Points: new[]
@@ -222,7 +230,7 @@ namespace SignalRGammon.Backgammon
                 actions.Add(arg);
                 return Task.FromResult(true);
             }
-            await Rules.CheckAutomaticActions(state, ExpectedDispatch);
+            await rules.CheckAutomaticActions(state, ExpectedDispatch);
 
             Assert.Empty(actions);
         }
@@ -230,8 +238,10 @@ namespace SignalRGammon.Backgammon
         [Fact(Skip = "We can't really remove other dice due to it maybe becoming valid in a different order; we'd have to disable dice in the first round, which isn't exactly something currently in the state machine...")]
         public async Task CatchWhenOnlyOneMoveCanBeMadeByBlack()
         {
-            var state = BackgammonState.DefaultState(new FakeDieRoller())
+            var rules = new Rules(new FakeDieRoller());
+            var state = BackgammonState.DefaultState()
                 .With(
+                    null,
                     CurrentPlayer: Player.Black,
                     DiceRolls: new DiceState(Player.Black, new[] { 4, 5 }, Array.Empty<int>()),
                     Points: new[]
@@ -270,7 +280,7 @@ namespace SignalRGammon.Backgammon
                 actions.Add(arg);
                 return Task.FromResult(true);
             }
-            await Rules.CheckAutomaticActions(state, ExpectedDispatch);
+            await rules.CheckAutomaticActions(state, ExpectedDispatch);
 
             Assert.Collection(
                 actions,
@@ -287,8 +297,10 @@ namespace SignalRGammon.Backgammon
         [Fact]
         public async Task RemovesDiceWhenBlackWins()
         {
-            var state = BackgammonState.DefaultState(new FakeDieRoller())
+            var rules = new Rules(new FakeDieRoller());
+            var state = BackgammonState.DefaultState()
                 .With(
+                    null,
                     CurrentPlayer: Player.Black,
                     DiceRolls: new DiceState(Player.Black, new[] { 5 }, Array.Empty<int>()),
                     Points: new[]
@@ -327,7 +339,7 @@ namespace SignalRGammon.Backgammon
                 actions.Add(arg);
                 return Task.FromResult(true);
             }
-            await Rules.CheckAutomaticActions(state, ExpectedDispatch);
+            await rules.CheckAutomaticActions(state, ExpectedDispatch);
 
             Assert.Collection(
                 actions,
@@ -344,8 +356,10 @@ namespace SignalRGammon.Backgammon
         [Fact]
         public async Task CatchWhenNoMovesCanBeMadeByWhite()
         {
-            var state = BackgammonState.DefaultState(new FakeDieRoller())
+            var rules = new Rules(new FakeDieRoller());
+            var state = BackgammonState.DefaultState()
                 .With(
+                    null,
                     CurrentPlayer: Player.White,
                     DiceRolls: new DiceState(Player.White, new[] { 4, 5 }, Array.Empty<int>()),
                     Points: new[]
@@ -384,7 +398,7 @@ namespace SignalRGammon.Backgammon
                 actions.Add(arg);
                 return Task.FromResult(true);
             }
-            await Rules.CheckAutomaticActions(state, ExpectedDispatch);
+            await rules.CheckAutomaticActions(state, ExpectedDispatch);
 
             Assert.Collection(
                 actions,
@@ -402,8 +416,10 @@ namespace SignalRGammon.Backgammon
         [Fact]
         public async Task CatchWhenCannotMoveOffBarByWhite()
         {
-            var state = BackgammonState.DefaultState(new FakeDieRoller())
+            var rules = new Rules(new FakeDieRoller());
+            var state = BackgammonState.DefaultState()
                 .With(
+                    null,
                     CurrentPlayer: Player.White,
                     DiceRolls: new DiceState(Player.White, new[] { 6 }, Array.Empty<int>()),
                     Points: new[]
@@ -442,7 +458,7 @@ namespace SignalRGammon.Backgammon
                 actions.Add(arg);
                 return Task.FromResult(true);
             }
-            await Rules.CheckAutomaticActions(state, ExpectedDispatch);
+            await rules.CheckAutomaticActions(state, ExpectedDispatch);
 
             Assert.Collection(
                 actions,
@@ -459,8 +475,10 @@ namespace SignalRGammon.Backgammon
         [Fact]
         public async Task AllowValidMovesByWhite()
         {
-            var state = BackgammonState.DefaultState(new FakeDieRoller())
+            var rules = new Rules(new FakeDieRoller());
+            var state = BackgammonState.DefaultState()
                 .With(
+                    null,
                     CurrentPlayer: Player.White,
                     DiceRolls: new DiceState(Player.White, new[] { 4, 5 }, Array.Empty<int>()),
                     Points: new[]
@@ -499,7 +517,7 @@ namespace SignalRGammon.Backgammon
                 actions.Add(arg);
                 return Task.FromResult(true);
             }
-            await Rules.CheckAutomaticActions(state, ExpectedDispatch);
+            await rules.CheckAutomaticActions(state, ExpectedDispatch);
 
             Assert.Empty(actions);
         }
@@ -507,8 +525,10 @@ namespace SignalRGammon.Backgammon
         [Fact]
         public async Task AllowValidMovesByWhiteInOrder()
         {
-            var state = BackgammonState.DefaultState(new FakeDieRoller())
+            var rules = new Rules(new FakeDieRoller());
+            var state = BackgammonState.DefaultState()
                 .With(
+                    null,
                     CurrentPlayer: Player.White,
                     DiceRolls: new DiceState(Player.White, new[] { 4, 5 }, Array.Empty<int>()),
                     Points: new[]
@@ -547,7 +567,7 @@ namespace SignalRGammon.Backgammon
                 actions.Add(arg);
                 return Task.FromResult(true);
             }
-            await Rules.CheckAutomaticActions(state, ExpectedDispatch);
+            await rules.CheckAutomaticActions(state, ExpectedDispatch);
 
             Assert.Empty(actions);
         }
@@ -555,8 +575,10 @@ namespace SignalRGammon.Backgammon
         [Fact(Skip = "We can't really remove other dice due to it maybe becoming valid in a different order; we'd have to disable dice in the first round, which isn't exactly something currently in the state machine...")]
         public async Task CatchWhenOnlyOneMoveCanBeMadeByWhite()
         {
-            var state = BackgammonState.DefaultState(new FakeDieRoller())
+            var rules = new Rules(new FakeDieRoller());
+            var state = BackgammonState.DefaultState()
                 .With(
+                    null,
                     CurrentPlayer: Player.White,
                     DiceRolls: new DiceState(Player.White, new[] { 4, 5 }, Array.Empty<int>()),
                     Points: new[]
@@ -595,7 +617,7 @@ namespace SignalRGammon.Backgammon
                 actions.Add(arg);
                 return Task.FromResult(true);
             }
-            await Rules.CheckAutomaticActions(state, ExpectedDispatch);
+            await rules.CheckAutomaticActions(state, ExpectedDispatch);
 
             Assert.Collection(
                 actions,
@@ -612,8 +634,10 @@ namespace SignalRGammon.Backgammon
         [Fact]
         public async Task RemovesDiceWhenWhiteWins()
         {
-            var state = BackgammonState.DefaultState(new FakeDieRoller())
+            var rules = new Rules(new FakeDieRoller());
+            var state = BackgammonState.DefaultState()
                 .With(
+                    null,
                     CurrentPlayer: Player.White,
                     DiceRolls: new DiceState(Player.White, new[] { 5 }, Array.Empty<int>()),
                     Points: new[]
@@ -652,7 +676,7 @@ namespace SignalRGammon.Backgammon
                 actions.Add(arg);
                 return Task.FromResult(true);
             }
-            await Rules.CheckAutomaticActions(state, ExpectedDispatch);
+            await rules.CheckAutomaticActions(state, ExpectedDispatch);
 
             Assert.Collection(
                 actions,

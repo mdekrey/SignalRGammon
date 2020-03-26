@@ -1,4 +1,6 @@
-﻿namespace SignalRGammon.Backgammon
+﻿using SignalRGammon.GameUtilities;
+
+namespace SignalRGammon.Backgammon
 {
     internal class FakeDieRoller : IDieRoller
     {
