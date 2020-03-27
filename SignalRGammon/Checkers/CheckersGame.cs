@@ -1,18 +1,24 @@
-﻿using SignalRGammon.GameUtilities;
+﻿using Newtonsoft.Json;
+using SignalRGammon.GameUtilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 namespace SignalRGammon.Checkers
 {
-    public class CheckersGame : GameBase<CheckersState, CheckersState, CheckersAction?>
+    public class CheckersGame : GameBase<CheckersExternalState, CheckersState, CheckersAction?>, IGame
     {
         public CheckersGame() : base(Defaults.DefaultState)
         {
         }
 
-        protected override CheckersState GetExternalState(CheckersState state) => state;
+        IObservable<string> IGame.JsonStates =>
+            States
+                .Select(s => JsonConvert.SerializeObject(new { state = s.state.State, validMovesForCurrentPlayer = s.state.ValidMovesForCurrentPlayer, s.action }, JsonSettings));
+
+        protected override CheckersExternalState GetExternalState(CheckersState state) => new CheckersExternalState(state);
         protected override Task<(CheckersState newState, bool isValid)> ApplyAction(CheckersState state, CheckersAction? action) =>
             Task.FromResult(Rules.ApplyAction(state, action));
         protected override Task CheckAutomaticActions(CheckersState state) =>

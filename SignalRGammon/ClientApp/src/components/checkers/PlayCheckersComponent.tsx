@@ -32,6 +32,8 @@ export function PlayCheckersComponent() {
     const isWaiting = isReady ? (!gameState.state.winner && gameState.state.currentPlayer !== playerColor) : gameState.state.isReady[playerColor];
     const winner = gameState.state.winner;
 
+    console.log(gameState.validMovesForCurrentPlayer);
+
     return (
         <div className="PlayCheckers">
             <svg style={filtersVariables()}
@@ -40,7 +42,10 @@ export function PlayCheckersComponent() {
                 <Filters />
                 <g transform={playerColor === 'white' ? boardPositions.whiteRotation : boardPositions.blackRotation}>
                     <Board />
-                    <CheckersBoardCheckers checkers={gameState.state.checkers} />
+                    <CheckersBoardCheckers
+                        checkers={gameState.state.checkers}
+                        currentPlayer={gameState.state.currentPlayer}
+                        validMovesForCurrentPlayer={gameState.validMovesForCurrentPlayer} />
                 </g>
             </svg>
             {isWaiting || winner || !isReady

@@ -1,6 +1,6 @@
 import React, { useContext, createContext, useMemo, useCallback } from "react";
 import { Observable, from } from "rxjs";
-import { switchMap, map, scan } from "rxjs/operators";
+import { switchMap, map } from "rxjs/operators";
 import { useGameConnection } from "../../services/gameConnectionContext";
 import { fromSignalR } from "../../utils/fromSignalR";
 import { CheckersState, PlayerColor, otherPlayer } from "./CheckersState";
@@ -10,12 +10,23 @@ export type CheckersAction = {
     // TODO
 };
 
-export type ObservedState = { state: CheckersState, action: CheckersAction };
+export type ValidMove = {
+    checkerIndex: number;
+    isJump: boolean;
+    moves: number[][];
+};
+
+export type ObservedState = {
+    state: CheckersState;
+    validMovesForCurrentPlayer: ValidMove[];
+    action: CheckersAction;
+};
 
 export type CheckersContextResult = {
     state: Observable<ObservedState | null>
 
     // TODO - actions
+    move: (move: ValidMove) => Promise<boolean>
     ready: () => Promise<boolean>
     newGame: () => Promise<boolean>
 
@@ -38,10 +49,15 @@ export function CheckersScope({ gameId, playerColor, children }: CheckersScopePr
     const { url } = useRouteMatch();
     const otherPlayerUrl = window.location.href.replace(url, url.replace(playerColor, otherPlayer(playerColor)));
 
+    const move = useCallback(async (move: ValidMove) => {
+        await connected;
+        return await connection.invoke<boolean>('Do', gameId, JSON.stringify({ type: 'move', player: playerColor, pieceIndex: move.checkerIndex, destination: move.moves }));
+    }, [connected, connection, gameId, playerColor])
+
     const ready = useCallback(async () => {
         await connected;
         return await connection.invoke<boolean>('Do', gameId, JSON.stringify({ type: 'ready', player: playerColor }));
-    }, [connected, connection, gameId])
+    }, [connected, connection, gameId, playerColor])
 
     const newGame = useCallback(async () => {
         await connected;
@@ -51,22 +67,16 @@ export function CheckersScope({ gameId, playerColor, children }: CheckersScopePr
     const state = useMemo(() => from(connected)
         .pipe(
             switchMap(() => fromSignalR(connection.stream('ListenState', gameId))),
-            map(json => JSON.parse(json) as { state: CheckersState, action: CheckersAction }),
-            scan(
-                (prev, { state, action }) =>
-                    prev
-                        ? ({ state, action, })
-                        : ({ state, action,  }) ,
-                null as ObservedState | null
-            )
+            map(json => JSON.parse(json) as ObservedState),
         ), [connection, connected, gameId]);
     const value = useMemo(() => ({
         state,
         newGame,
         ready,
+        move,
         otherPlayerUrl,
         playerColor,
-    }), [state, newGame, ready, otherPlayerUrl, playerColor]);
+    }), [state, newGame, ready, move, otherPlayerUrl, playerColor]);
 
     return (
         <CheckersContext.Provider value={value}>
