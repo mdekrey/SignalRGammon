@@ -13,7 +13,8 @@ export type CheckersAction = {
 export type ValidMove = {
     checkerIndex: number;
     isJump: boolean;
-    moves: number[][];
+    column: number;
+    row: number;
 };
 
 export type ObservedState = {
@@ -51,7 +52,7 @@ export function CheckersScope({ gameId, playerColor, children }: CheckersScopePr
 
     const move = useCallback(async (move: ValidMove) => {
         await connected;
-        return await connection.invoke<boolean>('Do', gameId, JSON.stringify({ type: 'move', player: playerColor, pieceIndex: move.checkerIndex, destination: move.moves }));
+        return await connection.invoke<boolean>('Do', gameId, JSON.stringify({ type: 'move', player: playerColor, pieceIndex: move.checkerIndex, column: move.column, row: move.row }));
     }, [connected, connection, gameId, playerColor])
 
     const ready = useCallback(async () => {

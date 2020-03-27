@@ -8,7 +8,7 @@ namespace SignalRGammon.Checkers
 {
     [JsonConverter(typeof(JsonSubtypes), "type")]
     [JsonSubtypes.KnownSubType(typeof(CheckersReady), CheckersReady.TypeValue)]
-    [JsonSubtypes.KnownSubType(typeof(CheckersDeclareWinner), CheckersDeclareWinner.TypeValue)]
+    [JsonSubtypes.KnownSubType(typeof(CheckersCannotMove), CheckersCannotMove.TypeValue)]
     [JsonSubtypes.KnownSubType(typeof(CheckersMove), CheckersMove.TypeValue)]
     [JsonSubtypes.KnownSubType(typeof(CheckersNewGame), CheckersNewGame.TypeValue)]
     public abstract class CheckersAction
@@ -33,14 +33,14 @@ namespace SignalRGammon.Checkers
         public Player Player { get; set; }
         public int PieceIndex { get; set; }
 
-        public int[][] Destination { get; set; } = Array.Empty<int[]>();
+        public int Column { get; set; }
+        public int Row { get; set; }
     }
 
-    public class CheckersDeclareWinner : CheckersAction
+    public class CheckersCannotMove : CheckersAction
     {
-        public const string TypeValue = "declare-winner";
+        public const string TypeValue = "no-moves";
         public override string Type => TypeValue;
-        public Player Player { get; set; }
     }
 
     public class CheckersNewGame : CheckersAction

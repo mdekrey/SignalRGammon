@@ -42,6 +42,7 @@ namespace SignalRGammon.Checkers
 
         public static readonly CheckersState DefaultState = new CheckersState(
                 CurrentPlayer: Player.White,
+                MovingChecker: null,
                 Winner: null,
                 IsReady: new PlayerState<bool>(false, false),
                 Checkers: InitialCheckers

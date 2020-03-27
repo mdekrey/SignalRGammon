@@ -9,13 +9,14 @@ namespace SignalRGammon.Checkers
     {
         public int CheckerIndex;
         public bool IsJump;
-        public int[][] Moves;
+        public int Column;
+        public int Row;
     }
 
     public readonly struct CheckersExternalState
     {
         public CheckersState State { get; }
-        public IReadOnlyList<Move>? ValidMovesForCurrentPlayer { get; }
+        public IReadOnlyList<Move> ValidMovesForCurrentPlayer { get; }
 
         public CheckersExternalState(CheckersState state)
         {
@@ -23,17 +24,18 @@ namespace SignalRGammon.Checkers
             this.ValidMovesForCurrentPlayer = GetValidMoves(state);
         }
 
-        public static IReadOnlyList<Move>? GetValidMoves(CheckersState state)
+        public static IReadOnlyList<Move> GetValidMoves(CheckersState state)
         {
             if (state.Winner != null)
-                return null;
+                return Array.Empty<Move>();
             var player = state.CurrentPlayer;
             var moves = (from tuple in state.Checkers[player].Select((checker, index) => (checker, index))
-                    where tuple.checker != null
-                    from move in GetValidMoves(tuple.checker!.Value, player, tuple.index, state.Checkers)
-                    select move).ToArray();
-            
-            if (moves.Any(m => m.IsJump))
+                         where tuple.checker != null
+                         where state.MovingChecker == null || tuple.index == state.MovingChecker
+                         from move in GetValidMoves(tuple.checker!.Value, player, tuple.index, state.Checkers)
+                         select move).ToArray();
+
+            if (state.MovingChecker != null || moves.Any(m => m.IsJump))
                 return moves.Where(m => m.IsJump).ToArray();
             return moves;
         }
@@ -43,30 +45,20 @@ namespace SignalRGammon.Checkers
         {
             return from rowOffset in ValidOffsets(checker, player)
                    from columnOffset in bothDirections
-                   from move in (checker.Row + rowOffset, checker.Column + columnOffset) switch
+                   let move = (checker.Row + rowOffset, checker.Column + columnOffset) switch
                    {
                        (int row, int column)
                             when IsOpenSpace((row, column), player, currentCheckerIndex, checkers) =>
-                                Of(new Move { IsJump = false, CheckerIndex = currentCheckerIndex, Moves = new[] { new[] { column, row } } }),
+                                new Move { IsJump = false, CheckerIndex = currentCheckerIndex, Column = column, Row = row },
                        (int row, int column)
-                            when HasCheckerAt(row, column, NonNullCheckers(checkers[player.OtherPlayer()])) 
-                              && IsOpenSpace((row + rowOffset, column + columnOffset), player, currentCheckerIndex, checkers) => 
-                                GetJumpMoves(checker.MoveTo(row + rowOffset, column + columnOffset, row == 0 || row == 7), player, currentCheckerIndex, checkers),
-                       _ => Enumerable.Empty<Move>()
+                            when GetCheckerAt(row, column, NonNullCheckers(checkers[player.OtherPlayer()])) != null
+                              && IsOpenSpace((row + rowOffset, column + columnOffset), player, currentCheckerIndex, checkers) =>
+                                new Move { IsJump = true, CheckerIndex = currentCheckerIndex, Column = column + columnOffset, Row = row + rowOffset },
+                       _ => (Move?)null
                    }
-                   select move;
+                   where move.HasValue
+                   select move.Value;
 
-        }
-
-        private static IEnumerable<Move> GetJumpMoves(SingleChecker checker, Player player, int currentCheckerIndex, PlayerState<IReadOnlyList<SingleChecker?>> checkers)
-        {
-            yield return new Move { IsJump = true, CheckerIndex = currentCheckerIndex, Moves = new[] { new[] { checker.Column, checker.Row } } };
-
-            foreach (var move in GetValidMoves(checker, player, currentCheckerIndex, checkers))
-            {
-                if (move.IsJump)
-                    yield return new Move { IsJump = true, CheckerIndex = currentCheckerIndex, Moves = new[] { new[] { checker.Column, checker.Row } }.Concat(move.Moves).ToArray() };
-            }
         }
 
         private static bool IsOpenSpace((int row, int column) p, Player player, int currentCheckerIndex, PlayerState<IReadOnlyList<SingleChecker?>> checkers)
@@ -77,14 +69,14 @@ namespace SignalRGammon.Checkers
                 (8, _) => false,
                 (_, -1) => false,
                 (_, 8) => false,
-                (int row, int column) => !HasCheckerAt(row, column, Except(checkers, player, currentCheckerIndex))
+                (int row, int column) => GetCheckerAt(row, column, Except(checkers, player, currentCheckerIndex)) == null
             };
         }
 
-        private static bool HasCheckerAt(int row, int column, IEnumerable<SingleChecker> enumerable) =>
+        private static SingleChecker? GetCheckerAt(int row, int column, IEnumerable<SingleChecker> enumerable) =>
             (from checker in enumerable
              where checker.Row == row && checker.Column == column
-             select checker).Any();
+             select (SingleChecker?)checker).FirstOrDefault();
 
         private static IEnumerable<SingleChecker> Except(PlayerState<IReadOnlyList<SingleChecker?>> checkers, Player player, int currentCheckerIndex) =>
             NonNullCheckers(checkers[player].Select((c, i) => i == currentCheckerIndex ? null : c)

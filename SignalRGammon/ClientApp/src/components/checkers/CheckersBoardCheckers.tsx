@@ -24,7 +24,6 @@ export function CheckersBoardCheckers({ checkers, validMovesForCurrentPlayer, cu
     const allowedMoves = selectedChecker !== null
         ? validMovesForCurrentPlayer.filter(m => m.checkerIndex === selectedChecker)
         : [];
-        console.log(allowedMoves);
 
     return (
         <>
@@ -46,21 +45,15 @@ export function CheckersBoardCheckers({ checkers, validMovesForCurrentPlayer, cu
             {/* Click-target checkers */}
             {
                 allowedMoves.map((option, idx) =>
-                    <g style={{ transform: checkerTranslation(option.moves[0][0], option.moves[0][1])}} key={idx}>
+                    <g style={{ transform: checkerTranslation(option.column, option.row)}} key={idx}>
                         <Checker player={"transparent"}
                         selectable={true /* TODO */}
-                        onClick={() => move(option)} />
+                        onClick={() => { setSelectedChecker(null); move(option); }} />
                     </g>
                 )
             }
         </>
     );
-
-    function allowed(column: number, row: number) {
-        const checker = currentChecker!
-        // TODO
-        return false;
-    }
 }
 
 function checkerTranslation(x: number, y: number) {
