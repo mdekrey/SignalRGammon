@@ -8,7 +8,7 @@ namespace SignalRGammon.Checkers
 {
     public class CheckersGame : GameBase<CheckersState, CheckersState, CheckersAction?>
     {
-        public CheckersGame() : base(CheckersState.DefaultState())
+        public CheckersGame() : base(Defaults.DefaultState)
         {
         }
 
