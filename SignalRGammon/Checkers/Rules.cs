@@ -34,7 +34,7 @@ namespace SignalRGammon.Checkers
                 case { Winner: Player winner }:
                     return action switch
                     {
-                        CheckersNewGame _ => (state.With(CurrentPlayer: winner.OtherPlayer(), Winner: null, Checkers: Defaults.InitialCheckers), true),
+                        CheckersNewGame _ => (Defaults.DefaultState.With(CurrentPlayer: winner.OtherPlayer()), true),
                         _ => (state, false)
                     };
             }

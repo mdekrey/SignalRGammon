@@ -48,7 +48,7 @@ namespace SignalRGammon.Checkers
         public CheckersState With(
             Player? CurrentPlayer = null,
             int? MovingChecker = -1,
-            Player? Winner = -1,
+            Player? Winner = null,
             PlayerState<bool>? IsReady = null,
             PlayerState<IReadOnlyList<SingleChecker?>>? Checkers = null
         )
@@ -57,8 +57,7 @@ namespace SignalRGammon.Checkers
                 CurrentPlayer: CurrentPlayer ?? this.CurrentPlayer,
                 MovingChecker: MovingChecker == -1 ? this.MovingChecker
                     : MovingChecker,
-                Winner: Winner == -1 ? this.Winner
-                    : Winner,
+                Winner: Winner ?? this.Winner,
                 IsReady: IsReady ?? this.IsReady,
                 Checkers: Checkers ?? this.Checkers
             );

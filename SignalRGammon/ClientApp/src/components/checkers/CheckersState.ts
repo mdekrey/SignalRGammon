@@ -8,7 +8,7 @@ export function otherPlayer(playerColor: PlayerColor) { return playerColor === '
 export type SingleChecker = {
     column: number;
     row: number;
-    isKing: number;
+    isKing: boolean;
 };
 
 export interface CheckersState {

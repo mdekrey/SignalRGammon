@@ -10,8 +10,11 @@ export const gridSize = checkerDiameter + padding;
 export const boardWidth = 8 * gridSize;
 export const boardHeight = boardWidth;
 
+export const blackRotation = undefined;
+export const whiteRotation = `rotate(180)`;
+
 export const boardPositions = Object.freeze({
     viewbox: `0 0 ${boardWidth} ${boardHeight}`,
     blackRotation: undefined,
-    whiteRotation: `translate(${boardWidth},${boardHeight}) rotate(180)`,
+    whiteRotation: `translate(${boardWidth},${boardHeight}) ${whiteRotation}`,
 });

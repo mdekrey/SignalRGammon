@@ -36,6 +36,7 @@ export function CheckersBoardCheckers({ checkers, validMovesForCurrentPlayer, cu
                             <Checker player={player}
                                 selected={idx === selectedChecker && player === playerColor}
                                 selectable={contains(allowedCheckers, idx) && player === playerColor}
+                                isKing={checker.isKing}
                                 onClick={() => setSelectedChecker(contains(allowedCheckers, idx) && player === playerColor ? idx : null)} />
                         </g>
                     ))}
