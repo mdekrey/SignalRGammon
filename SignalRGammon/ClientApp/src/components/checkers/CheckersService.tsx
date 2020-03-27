@@ -40,7 +40,7 @@ export function CheckersScope({ gameId, playerColor, children }: CheckersScopePr
 
     const ready = useCallback(async () => {
         await connected;
-        return await connection.invoke<boolean>('Do', gameId, JSON.stringify({ type: 'ready', playerColor }));
+        return await connection.invoke<boolean>('Do', gameId, JSON.stringify({ type: 'ready', player: playerColor }));
     }, [connected, connection, gameId])
 
     const newGame = useCallback(async () => {

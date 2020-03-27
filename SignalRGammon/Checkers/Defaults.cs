@@ -7,7 +7,7 @@ namespace SignalRGammon.Checkers
 {
     public class Defaults
     {
-        private static readonly PlayerState<IReadOnlyList<SingleChecker?>> InitialCheckers = new PlayerState<IReadOnlyList<SingleChecker?>>(
+        public static readonly PlayerState<IReadOnlyList<SingleChecker?>> InitialCheckers = new PlayerState<IReadOnlyList<SingleChecker?>>(
             white: new SingleChecker?[]
             {
                 new SingleChecker(1, 0),

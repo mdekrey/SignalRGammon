@@ -28,10 +28,9 @@ export function PlayCheckersComponent() {
         );
     }
 
-    const isWaiting = !gameState.state.winner && gameState.state.currentPlayer !== playerColor;
+    const isReady = gameState.state.isReady.white && gameState.state.isReady.black;
+    const isWaiting = isReady ? (!gameState.state.winner && gameState.state.currentPlayer !== playerColor) : gameState.state.isReady[playerColor];
     const winner = gameState.state.winner;
-
-    console.log(gameState.state);
 
     return (
         <div className="PlayCheckers">
@@ -44,12 +43,13 @@ export function PlayCheckersComponent() {
                     <CheckersBoardCheckers checkers={gameState.state.checkers} />
                 </g>
             </svg>
-            {isWaiting || winner || !gameState.state.isReady.white || !gameState.state.isReady.black
+            {isWaiting || winner || !isReady
                 ? <div className="overlay">
                     <div className="child">
-                        {(!gameState.state.isReady.white || !gameState.state.isReady.black)
+                        {(!isReady)
                             && <div className="share-link">Share this with the other player: <input type="text" value={otherPlayerUrl} onClick={copyUrl} readOnly /></div>}
-                        {!gameState.state.isReady[playerColor] && <div className="ready-button-container"><button className="ready-button" onClick={ready} disabled={!gameState}>Ready!</button></div>}
+                        {!gameState.state.isReady[playerColor]
+                            && <div className="ready-button-container"><button className="ready-button" onClick={ready} disabled={!gameState}>Ready!</button></div>}
                         {isWaiting && <div className="waiting-container"><h1>Waiting on the other player...</h1></div>}
                         {winner && <div className="winner-container">
                             <h1>{winner === playerColor ? "You won!" : "The other player won."}</h1>
