@@ -11,7 +11,7 @@ export const Board = () =>
         {Array(64).fill(0).map((_, idx) => {
             const y = Math.floor(idx / 8);
             const x = idx % 8;
-            if ((x + y) % 2 === 0)
+            if ((x + y) % 2 === 1)
                 return null;
             return <rect key={idx} x={x * gridSize} y={y * gridSize} width={gridSize} height={gridSize} className="tile" />;
         })}
