@@ -1,0 +1,48 @@
+
+.checker {
+    stroke: rgba(0,0,0, 0.87);
+    filter: none;
+}
+
+.checker .glow {
+    stroke: rgb(255,186,0);
+    stroke-width: 1px;
+    filter: var(--selectionGlow);
+    display: none;
+}
+
+.checker.selectable:hover .glow {
+    display: initial;
+}
+.checker.selected .glow {
+    display: initial;
+}
+.checker {
+    filter: var(--dropshadow);
+}
+
+.checker.transparent {
+    fill: transparent;
+    stroke: transparent;
+}
+
+.checker.white {
+    fill: wheat;
+}
+
+.checker.black {
+    fill: #251203;
+}
+
+.felt rect:first-child {
+    fill: #004000;
+}
+
+.felt rect:nth-child(2) {
+    filter: var(--noise);
+    opacity: 0.1;
+}
+
+.tile {
+    fill: rgba(255,255,255, 0.27);
+}
