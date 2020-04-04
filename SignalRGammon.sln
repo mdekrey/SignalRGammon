@@ -3,9 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29403.142
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalRGammon", "SignalRGammon\SignalRGammon.csproj", "{8653ED10-25C4-45F7-A462-329544B13C4E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalRGame.Server", "SignalRGame.Server\SignalRGame.Server.csproj", "{8653ED10-25C4-45F7-A462-329544B13C4E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalRGammon.Tests", "SignalRGammon.Tests\SignalRGammon.Tests.csproj", "{AFEA7B1A-2271-48F9-8813-06B3FAB5A84F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalRGame", "SignalRGame\SignalRGame.csproj", "{AF1C1987-CD29-428B-8516-DAEB9AFEDE9E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalRGame.Checkers", "SignalRGame.Checkers\SignalRGame.Checkers.csproj", "{68C17875-7216-49E5-85E0-B47DADEA29BC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalRGame.Backgammon", "SignalRGame.Backgammon\SignalRGame.Backgammon.csproj", "{D77A82F3-74E6-488A-A980-11F5781FC5C3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalRGame.Backgammon.Tests", "SignalRGame.Backgammon.Tests\SignalRGame.Backgammon.Tests.csproj", "{C55504E6-27C7-4C98-A18D-713CEE4767D9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +23,22 @@ Global
 		{8653ED10-25C4-45F7-A462-329544B13C4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8653ED10-25C4-45F7-A462-329544B13C4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8653ED10-25C4-45F7-A462-329544B13C4E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AFEA7B1A-2271-48F9-8813-06B3FAB5A84F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AFEA7B1A-2271-48F9-8813-06B3FAB5A84F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AFEA7B1A-2271-48F9-8813-06B3FAB5A84F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AFEA7B1A-2271-48F9-8813-06B3FAB5A84F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF1C1987-CD29-428B-8516-DAEB9AFEDE9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF1C1987-CD29-428B-8516-DAEB9AFEDE9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF1C1987-CD29-428B-8516-DAEB9AFEDE9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF1C1987-CD29-428B-8516-DAEB9AFEDE9E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68C17875-7216-49E5-85E0-B47DADEA29BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68C17875-7216-49E5-85E0-B47DADEA29BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68C17875-7216-49E5-85E0-B47DADEA29BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68C17875-7216-49E5-85E0-B47DADEA29BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D77A82F3-74E6-488A-A980-11F5781FC5C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D77A82F3-74E6-488A-A980-11F5781FC5C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D77A82F3-74E6-488A-A980-11F5781FC5C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D77A82F3-74E6-488A-A980-11F5781FC5C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C55504E6-27C7-4C98-A18D-713CEE4767D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C55504E6-27C7-4C98-A18D-713CEE4767D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C55504E6-27C7-4C98-A18D-713CEE4767D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C55504E6-27C7-4C98-A18D-713CEE4767D9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
