@@ -16,9 +16,12 @@ WORKDIR /src
 COPY . .
 WORKDIR "/src/SignalRGame.Server"
 RUN dotnet build "SignalRGame.Server.csproj" -c Release -o /app/build
+WORKDIR /src
+RUN dotnet test -c Release
 
 
 FROM build AS publish
+WORKDIR "/src/SignalRGame.Server"
 RUN dotnet publish "SignalRGame.Server.csproj" -c Release -o /app/publish
 
 FROM base AS final
