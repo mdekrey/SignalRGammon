@@ -13,6 +13,7 @@ namespace SignalRGammon.Clash
         [JsonSubtypes.KnownSubType(typeof(EliteUnit), EmptyPlaceholder.TypeValue)]
         [JsonSubtypes.KnownSubType(typeof(ChampionUnit), EmptyPlaceholder.TypeValue)]
         [JsonSubtypes.KnownSubType(typeof(UnitPart), EmptyPlaceholder.TypeValue)]
+        [JsonSubtypes.KnownSubType(typeof(WallUnit), EmptyPlaceholder.TypeValue)]
         public abstract class UnitPlaceholder
         {
             /// <summary>
@@ -45,30 +46,63 @@ namespace SignalRGammon.Clash
         {
             public const string TypeValue = "standard";
             public override string Type => TypeValue;
-            public StandardUnit(string id) : base(id)
+            public int ColorId { get; }
+            public ChargeState? ChargeState { get; }
+            public StandardUnit(string id, int colorId, ChargeState? chargeState) : base(id)
             {
+                ColorId = colorId;
+                this.ChargeState = chargeState;
             }
-            public int ColorId { get; set; }
         }
         public class EliteUnit : PlacedUnit
         {
             public const string TypeValue = "elite";
             public override string Type => TypeValue;
-            public EliteUnit(string id) : base(id)
+            public int ColorId { get; }
+            public int ArmySpecialUnitIndex { get; }
+            public ChargeState? ChargeState { get; }
+            public EliteUnit(string id, int colorId, int armySpecialUnitIndex, ChargeState? chargeState) : base(id)
             {
+                ColorId = colorId;
+                ArmySpecialUnitIndex = armySpecialUnitIndex;
+                this.ChargeState = chargeState;
             }
-            public int ColorId { get; set; }
-            public int ArmySpecialUnitIndex { get; set; }
         }
         public class ChampionUnit : PlacedUnit
         {
             public const string TypeValue = "champion";
             public override string Type => TypeValue;
-            public ChampionUnit(string id) : base(id)
+            public int ColorId { get; }
+            public int ArmySpecialUnitIndex { get; }
+            public ChargeState? ChargeState { get; }
+            public ChampionUnit(string id, int colorId, int armySpecialUnitIndex, ChargeState? chargeState) : base(id)
             {
+                ColorId = colorId;
+                ArmySpecialUnitIndex = armySpecialUnitIndex;
+                this.ChargeState = chargeState;
             }
-            public int ColorId { get; set; }
-            public int ArmySpecialUnitIndex { get; set; }
+        }
+        public class WallUnit : PlacedUnit
+        {
+            public const string TypeValue = "champion";
+            public override string Type => TypeValue;
+            public int Strength { get; }
+            public WallUnit(string id, int strength) : base(id)
+            {
+                Strength = strength;
+            }
+        }
+        public readonly struct ChargeState
+        {
+            public int FuseCount { get; }
+            public int CurrentAttack { get; }
+            public int TurnsRemaining { get; }
+            public ChargeState(int fuseCount, int currentAttack, int turnsRemaining)
+            {
+                FuseCount = fuseCount;
+                CurrentAttack = currentAttack;
+                TurnsRemaining = turnsRemaining;
+            }
         }
 
 

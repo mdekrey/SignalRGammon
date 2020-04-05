@@ -27,6 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SignalRGame.Backgammon\SignalRGame.Backgammon.csproj" />
     <ProjectReference Include="..\SignalRGame.Checkers\SignalRGame.Checkers.csproj" />
+    <ProjectReference Include="..\SignalRGame.ClashOfClones\SignalRGame.ClashOfClones.csproj" />
     <ProjectReference Include="..\SignalRGame\SignalRGame.csproj" />
   </ItemGroup>
 

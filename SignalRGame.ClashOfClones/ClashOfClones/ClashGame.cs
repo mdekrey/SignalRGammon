@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using SignalRGammon.GameUtilities;
+using SignalRGame.GameUtilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
