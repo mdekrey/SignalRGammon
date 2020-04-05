@@ -3,7 +3,7 @@
 To run it locally on port 8001, run the following in Powershell Core:
 
     ./publish.ps1
-    docker run --rm -p8001:80 dekreydotnet.azurecr.io/signalrgammon
+    docker run --rm -ti -p8001:80 dekreydotnet.azurecr.io/signalrgammon
 
 
 To deploy it to the kubernetes cluster, run the following in Powershell Core:
