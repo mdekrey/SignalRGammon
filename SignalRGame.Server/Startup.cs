@@ -45,7 +45,6 @@ namespace SignalRGame
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHub<GameHub>("/gameHub");
-                endpoints.MapHub<ChatHub>("/chatHub");
             });
 
             app.UseSpa(spa =>
