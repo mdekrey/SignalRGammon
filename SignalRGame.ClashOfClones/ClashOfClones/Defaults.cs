@@ -9,6 +9,7 @@ namespace SignalRGammon.Clash
     public class Defaults
     {
         public static readonly ArmyConfiguration DefaultArmyConfiguration = new ArmyConfiguration(
+            15,
             new StandardUnitConfiguration<string>("Human-Swordsmen", "Human-Swordsmen", "Human-Swordsmen"), 
             new SpecialUnitConfiguration[0]
         );

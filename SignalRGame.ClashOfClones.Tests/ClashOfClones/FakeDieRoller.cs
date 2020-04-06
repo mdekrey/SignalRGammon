@@ -1,6 +1,6 @@
 ﻿using SignalRGame.GameUtilities;
 
-namespace SignalRGame.Backgammon
+namespace SignalRGame.ClashOfClones
 {
     internal class FakeDieRoller : IDieRoller
     {

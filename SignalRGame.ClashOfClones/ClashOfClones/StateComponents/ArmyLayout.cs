@@ -42,44 +42,40 @@ namespace SignalRGammon.Clash
             {
             }
         }
-        public class StandardUnit : PlacedUnit
+        public abstract class UnitInstance : PlacedUnit
+        {
+            public int ColorId { get; }
+            public ChargeState? ChargeState { get; }
+            public UnitInstance(string id, int colorId, ChargeState? chargeState) : base(id)
+            {
+                ColorId = colorId;
+                this.ChargeState = chargeState;
+            }
+        }
+        public class StandardUnit : UnitInstance
         {
             public const string TypeValue = "standard";
             public override string Type => TypeValue;
-            public int ColorId { get; }
-            public ChargeState? ChargeState { get; }
-            public StandardUnit(string id, int colorId, ChargeState? chargeState) : base(id)
-            {
-                ColorId = colorId;
-                this.ChargeState = chargeState;
-            }
+            public StandardUnit(string id, int colorId, ChargeState? chargeState) : base(id, colorId, chargeState) { }
         }
-        public class EliteUnit : PlacedUnit
+        public class EliteUnit : UnitInstance
         {
             public const string TypeValue = "elite";
             public override string Type => TypeValue;
-            public int ColorId { get; }
             public int ArmySpecialUnitIndex { get; }
-            public ChargeState? ChargeState { get; }
-            public EliteUnit(string id, int colorId, int armySpecialUnitIndex, ChargeState? chargeState) : base(id)
+            public EliteUnit(string id, int colorId, ChargeState? chargeState, int armySpecialUnitIndex) : base(id, colorId, chargeState)
             {
-                ColorId = colorId;
                 ArmySpecialUnitIndex = armySpecialUnitIndex;
-                this.ChargeState = chargeState;
             }
         }
-        public class ChampionUnit : PlacedUnit
+        public class ChampionUnit : UnitInstance
         {
             public const string TypeValue = "champion";
             public override string Type => TypeValue;
-            public int ColorId { get; }
             public int ArmySpecialUnitIndex { get; }
-            public ChargeState? ChargeState { get; }
-            public ChampionUnit(string id, int colorId, int armySpecialUnitIndex, ChargeState? chargeState) : base(id)
+            public ChampionUnit(string id, int colorId, ChargeState? chargeState, int armySpecialUnitIndex) : base(id, colorId, chargeState)
             {
-                ColorId = colorId;
                 ArmySpecialUnitIndex = armySpecialUnitIndex;
-                this.ChargeState = chargeState;
             }
         }
         public class WallUnit : PlacedUnit
@@ -114,16 +110,26 @@ namespace SignalRGammon.Clash
             public const int Columns = 7;
             public const int TotalCount = Rows * Columns;
 
-            public IReadOnlyList<PlacedUnit> Units { get; }
+            public IReadOnlyList<UnitPlaceholder> Units { get; }
 
-            public ArmyLayout(IReadOnlyList<PlacedUnit> units)
+            public ArmyLayout(IReadOnlyList<UnitPlaceholder> units)
             {
                 if (units.Count != TotalCount)
                     throw new ArgumentException("Must have {TotalCount} unit slots", nameof(units));
                 this.Units = units;
             }
 
-            public PlacedUnit this[int column, int row] => Units[column + row * Columns];
+            public UnitPlaceholder this[int column, int row] => Units[GetIndexFor(column, row)];
+
+            public static int GetIndexFor(int column, int row)
+            {
+                return column + row * Columns;
+            }
+
+            public static (int column, int row) GetPositionFor(int index)
+            {
+                return (column: index % Columns, row: index / Columns);
+            }
         }
     }
 }
