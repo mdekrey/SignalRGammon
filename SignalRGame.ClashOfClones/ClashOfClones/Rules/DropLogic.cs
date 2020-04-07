@@ -61,15 +61,15 @@ namespace SignalRGame.ClashOfClones.Rules
                 armyLayout = Drop(armyLayout, column, unit);
             }
             return armyLayout;
+        }
 
-            IEnumerable<int> GetColumnOptions(ArmyLayout armyLayout)
+        public static IEnumerable<int> GetColumnOptions(ArmyLayout armyLayout)
+        {
+            for (var column = 0; column < ArmyLayout.Columns; column++)
             {
-                for (var column = 0; column < ArmyLayout.Columns; column++)
-                {
-                    if (!(armyLayout.IsEmpty(column, ArmyLayout.Rows - 1)))
-                        continue;
-                    yield return column;
-                }
+                if (!armyLayout.IsEmpty(column, ArmyLayout.Rows - 1))
+                    continue;
+                yield return column;
             }
         }
 

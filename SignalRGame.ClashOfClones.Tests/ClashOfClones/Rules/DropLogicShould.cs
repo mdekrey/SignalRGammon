@@ -41,6 +41,23 @@ namespace SignalRGame.ClashOfClones.Rules
         }
 
         [Fact]
+        public void GenerateNewUnitsWithHighRanks()
+        {
+            var gameSettings = new GameSettings();
+            var armyConfiguration = Defaults.StaffedArmyConfiguration;
+            var armyLayout = new ArmyLayout(Enumerable.Repeat<UnitPlaceholder>(new EmptyPlaceholder(), ArmyLayout.TotalCount).ToArray())
+                .Drop(0, new ChampionUnit("foo", 0, null, 0))
+                .Drop(2, new EliteUnit("foo2", 0, null, 0));
+            var target = MakeTarget(Enumerable.Range(0, armyConfiguration.MaxUnitCount * 2).Select(index => (Func<int, int>)(sides => index % 2 == 0 ? 0 : sides - 1)).ToArray());
+
+            var newArmyLayout = target.Recruit(armyLayout, armyConfiguration, gameSettings);
+
+            var counts = target.CurrentUnits(newArmyLayout).Sum(t => t.unitCount);
+            Assert.Equal(armyConfiguration.MaxUnitCount, counts);
+            Assert.Empty(ArmyLayoutMatcher.GetMatches(newArmyLayout));
+        }
+
+        [Fact]
         public void GetDropOptionsForBlankBattlefield()
         {
             var gameSettings = new GameSettings();
