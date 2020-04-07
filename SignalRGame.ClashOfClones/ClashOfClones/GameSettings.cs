@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SignalRGammon.ClashOfClones
+namespace SignalRGame.ClashOfClones
 {
     public readonly struct UnitStats
     {
@@ -57,9 +57,19 @@ namespace SignalRGammon.ClashOfClones
 
     public class GameSettings
     {
-        public readonly IReadOnlyDictionary<string, UnitStats> units = new Dictionary<string, UnitStats>()
+        public readonly IReadOnlyDictionary<string, UnitStats> Units = new Dictionary<string, UnitStats>()
         {
             { "Human-Swordsmen", new UnitStats("Swordsmen", attack: 11, power: 3, chargePerTurn: 3, chargeTime: 3) },
+        }.ToImmutableDictionary();
+
+        public readonly IReadOnlyDictionary<string, UnitStats> Elites = new Dictionary<string, UnitStats>()
+        {
+            { "Human-Knight", new UnitStats("Knight", attack: 30, power: 6, chargePerTurn: 0, chargeTime: 4) },
+        }.ToImmutableDictionary();
+
+        public readonly IReadOnlyDictionary<string, UnitStats> Champions = new Dictionary<string, UnitStats>()
+        {
+            { "Human-Angel", new UnitStats("Angel", attack: 115, power: 23, chargePerTurn: 15, chargeTime: 6) },
         }.ToImmutableDictionary();
 
     }

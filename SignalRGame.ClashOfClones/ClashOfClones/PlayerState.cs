@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SignalRGammon.Clash
+namespace SignalRGame.ClashOfClones
 {
     public readonly struct PlayerState<T>
     {

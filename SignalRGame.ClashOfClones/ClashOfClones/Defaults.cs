@@ -1,10 +1,10 @@
-﻿using SignalRGammon.Clash.StateComponents;
+﻿using SignalRGame.ClashOfClones.StateComponents;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SignalRGammon.Clash
+namespace SignalRGame.ClashOfClones
 {
     public class Defaults
     {
@@ -12,6 +12,15 @@ namespace SignalRGammon.Clash
             15,
             new StandardUnitConfiguration<string>("Human-Swordsmen", "Human-Swordsmen", "Human-Swordsmen"), 
             new SpecialUnitConfiguration[0]
+        );
+        public static readonly ArmyConfiguration StaffedArmyConfiguration = new ArmyConfiguration(
+            30,
+            new StandardUnitConfiguration<string>("Human-Swordsmen", "Human-Swordsmen", "Human-Swordsmen"),
+            new []
+            {
+                new SpecialUnitConfiguration("Human-Knight", 10),
+                new SpecialUnitConfiguration("Human-Angel", 5),
+            }
         );
         public static readonly ClashState DefaultState = new ClashState(
                 CurrentPlayer: Player.White,

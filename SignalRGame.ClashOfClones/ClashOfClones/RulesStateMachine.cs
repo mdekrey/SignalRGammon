@@ -4,11 +4,11 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SignalRGammon.Clash
+namespace SignalRGame.ClashOfClones
 {
     using ActionDispatcher = Func<ClashAction, Task<bool>>;
 
-    public class Rules
+    public class RulesStateMachine
     {
         public static (ClashState, bool) ApplyAction(ClashState state, ClashAction? action)
         {

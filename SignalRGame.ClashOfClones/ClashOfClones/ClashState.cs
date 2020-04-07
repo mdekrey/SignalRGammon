@@ -1,8 +1,8 @@
-﻿using SignalRGammon.Clash.StateComponents;
+﻿using SignalRGame.ClashOfClones.StateComponents;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SignalRGammon.Clash
+namespace SignalRGame.ClashOfClones
 {
     public readonly struct ClashState
     {

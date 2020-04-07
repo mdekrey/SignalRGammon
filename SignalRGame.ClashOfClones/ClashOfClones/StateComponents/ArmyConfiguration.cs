@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SignalRGammon.Clash
+namespace SignalRGame.ClashOfClones
 {
     namespace StateComponents
     {

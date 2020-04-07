@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SignalRGammon.Clash
+namespace SignalRGame.ClashOfClones
 {
     namespace StateComponents
     {

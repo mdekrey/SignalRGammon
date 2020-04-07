@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 
-namespace SignalRGammon.Clash
+namespace SignalRGame.ClashOfClones
 {
     public class ClashGame : GameBase<ClashState, ClashState, ClashAction?>, IGame
     {
@@ -17,8 +17,8 @@ namespace SignalRGammon.Clash
 
         protected override ClashState GetExternalState(ClashState state) => state;
         protected override Task<(ClashState newState, bool isValid)> ApplyAction(ClashState state, ClashAction? action) =>
-            Task.FromResult(Rules.ApplyAction(state, action));
+            Task.FromResult(RulesStateMachine.ApplyAction(state, action));
         protected override Task CheckAutomaticActions(ClashState state) =>
-            Rules.CheckAutomaticActions(state, Do);
+            RulesStateMachine.CheckAutomaticActions(state, Do);
     }
 }

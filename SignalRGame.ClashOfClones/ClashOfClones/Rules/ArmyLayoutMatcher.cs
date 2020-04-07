@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using SignalRGammon.Clash.StateComponents;
+using SignalRGame.ClashOfClones.StateComponents;
 
 namespace SignalRGame.ClashOfClones.Rules
 {
@@ -21,9 +21,21 @@ namespace SignalRGame.ClashOfClones.Rules
                             if (IsStartOfStandardFormation(armyLayout, column, row, out var formationMatch))
                                 yield return formationMatch;
                             break;
-                        // TODO - elites
-                        // TODO - champions
-                        default: continue;
+                        case EliteUnit { ChargeState: null }:
+                            if (IsStartOfEliteFormation(armyLayout, column, row, out var eliteMatch))
+                                yield return eliteMatch;
+                            break;
+                        case ChampionUnit { ChargeState: null }:
+                            if (IsStartOfChampionFormation(armyLayout, column, row, out var championMatch))
+                                yield return championMatch;
+                            break;
+                        case WallUnit _: 
+                            // TODO - combine walls
+                        case EmptyPlaceholder _:
+                        case UnitPart _:
+                            continue;
+                        default:
+                            throw new NotImplementedException();
                     }
                 }
             }
@@ -38,8 +50,6 @@ namespace SignalRGame.ClashOfClones.Rules
                 && armyLayout[column - 1, row] is StandardUnit { ChargeState: null, ColorId: var prevColor }
                 && prevColor == currentColor)
                 return false; // to the left was an uncharged unit of the same color; wall is further left
-            if (column >= ArmyLayout.Columns - 2)
-                return false; // too close to right edge
 
             var ids = Enumerable.Range(column, ArmyLayout.Columns)
                 .TakeWhile(column => column < ArmyLayout.Columns)
@@ -62,19 +72,50 @@ namespace SignalRGame.ClashOfClones.Rules
                 && armyLayout[column, row - 1] is StandardUnit { ChargeState: null, ColorId: var prevColor }
                 && prevColor == currentColor)
                 return false; // to the front was an uncharged unit of the same color; front of formation is further up
-            if (row >= ArmyLayout.Rows - 2)
-                return false; // too close to back of layout
 
-            var ids = Enumerable.Range(row, ArmyLayout.Rows)
-                .TakeWhile(row => row < ArmyLayout.Rows)
+            var ids = GetStandardUnitIds(armyLayout, currentColor, column, row + 1);
+            if (ids.Length < 2)
+                return false;
+            match = new ArmyLayoutMatch(new[] { startId }.Concat(ids).ToArray(), false);
+            return true;
+        }
+
+        private static string[] GetStandardUnitIds(ArmyLayout armyLayout, int currentColor, int column, int row)
+        {
+            return Enumerable.Range(row, 2)
+                .Where(row => row < ArmyLayout.Rows)
                 .Select(row => armyLayout[column, row])
                 .TakeWhile(unit => unit is StandardUnit { ChargeState: null, ColorId: var nextColor } && nextColor == currentColor)
                 .Select(unit => ((StandardUnit)unit).Id)
-                .Take(3) // TODO - what do we do if there's a 4-unit formation?
                 .ToArray();
-            if (ids.Length < 3)
+        }
+
+        public static bool IsStartOfEliteFormation(ArmyLayout armyLayout, int column, int row, out ArmyLayoutMatch match)
+        {
+            match = default;
+            if (!(armyLayout[column, row] is EliteUnit { ColorId: var currentColor, ChargeState: null, Id: var startId }))
+                return false; // was not an uncharged elite unit
+
+            var ids = GetStandardUnitIds(armyLayout, currentColor, column, row + 2);
+            if (ids.Length < 2)
                 return false;
-            match = new ArmyLayoutMatch(ids, false);
+            match = new ArmyLayoutMatch(new[] { startId }.Concat(ids).ToArray(), false);
+            return true;
+        }
+
+        public static bool IsStartOfChampionFormation(ArmyLayout armyLayout, int column, int row, out ArmyLayoutMatch match)
+        {
+            match = default;
+            if (!(armyLayout[column, row] is ChampionUnit { ColorId: var currentColor, ChargeState: null, Id: var startId }))
+                return false; // was not an uncharged champion unit
+
+            var ids = GetStandardUnitIds(armyLayout, currentColor, column, row + 2);
+            if (ids.Length < 2)
+                return false;
+            var col2Ids = GetStandardUnitIds(armyLayout, currentColor, column + 1, row + 2);
+            if (col2Ids.Length < 2)
+                return false;
+            match = new ArmyLayoutMatch(new[] { startId }.Concat(ids).Concat(col2Ids).ToArray(), false);
             return true;
         }
     }

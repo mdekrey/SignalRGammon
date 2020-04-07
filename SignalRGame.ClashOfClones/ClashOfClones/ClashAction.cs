@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SignalRGammon.Clash
+namespace SignalRGame.ClashOfClones
 {
     [JsonConverter(typeof(JsonSubtypes), "type")]
     [JsonSubtypes.KnownSubType(typeof(ClashReady), ClashReady.TypeValue)]

@@ -1,5 +1,6 @@
 ﻿using SignalRGame.GameUtilities;
-using SignalRGammon.Clash.StateComponents;
+using SignalRGame.ClashOfClones.StateComponents;
+using SignalRGame.ClashOfClones;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -38,76 +39,133 @@ namespace SignalRGame.ClashOfClones.Rules
             };
         }
 
-        public ArmyLayout Recruit(ArmyLayout armyLayout, ArmyConfiguration armyConfiguration)
+        public ArmyLayout Recruit(ArmyLayout armyLayout, ArmyConfiguration armyConfiguration, GameSettings gameSettings)
         {
             var initialUnits = CurrentUnits(armyLayout);
             var newCount = armyConfiguration.MaxUnitCount - initialUnits.Sum(u => u.unitCount);
-            var eliteCount = initialUnits.Where(u => u.primary is EliteUnit).Count();
-            var championCount = initialUnits.Where(u => u.primary is ChampionUnit).Count();
+            var highRankCount = initialUnits.Where(u => u.primary is EliteUnit).Count()
+                + 2 * initialUnits.Where(u => u.primary is ChampionUnit).Count();
             for (var i = newCount; i > 0; i--)
             {
-                var options = (from option in GetWeightedOptions(armyLayout, armyConfiguration)
-                               from entry in Enumerable.Repeat((option.column, option.unitFactory), option.odds)
+                var columnOptions = GetColumnOptions(armyLayout).ToArray();
+                var column = columnOptions[dieRoller.RollDie(columnOptions.Length)];
+                var options = (from option in GetWeightedOptions(column, armyLayout, armyConfiguration, gameSettings, highRankCount)
+                               from entry in Enumerable.Repeat(option.unitFactory, option.odds)
                                select entry
                               ).ToArray();
-                var (column, unitFactory) = options[dieRoller.RollDie(options.Length)];
+                var unitFactory = options[dieRoller.RollDie(options.Length)];
                 var unit = unitFactory();
 
-                if (unit is EliteUnit) eliteCount++;
-                if (unit is ChampionUnit) eliteCount++;
+                if (unit is EliteUnit) highRankCount++;
+                if (unit is ChampionUnit) highRankCount += 2;
                 armyLayout = Drop(armyLayout, column, unit);
             }
             return armyLayout;
 
-            IEnumerable<(int column, Func<UnitInstance> unitFactory, int odds)> GetWeightedOptions(ArmyLayout armyLayout, ArmyConfiguration armyConfiguration)
+            IEnumerable<int> GetColumnOptions(ArmyLayout armyLayout)
             {
                 for (var column = 0; column < ArmyLayout.Columns; column++)
                 {
-                    if (!(armyLayout[column, ArmyLayout.Rows - 1] is EmptyPlaceholder))
+                    if (!(armyLayout.IsEmpty(column, ArmyLayout.Rows - 1)))
                         continue;
+                    yield return column;
+                }
+            }
+        }
 
-                    for (var color = 0; color < ArmyConfiguration.ColorCount; color++)
+        public static IEnumerable<(Func<UnitInstance> unitFactory, int odds)> GetWeightedOptions(int column, ArmyLayout armyLayout, ArmyConfiguration armyConfiguration, GameSettings gameSettings, int highRankCount)
+        {
+            for (var c = 0; c < ArmyConfiguration.ColorCount; c++)
+            {
+                var color = c;
+                if (ArmyLayoutMatcher.GetMatches(Drop(armyLayout, column, new StandardUnit("", color, null))).Any())
+                {
+                    continue;
+                }
+                yield return (() => new StandardUnit(MakeUnitId(), color, null), armyConfiguration.MaxUnitCount);
+            }
+
+            if (highRankCount < 4 && armyLayout.IsEmpty(column, ArmyLayout.Rows - 2))
+            {
+                for (var i = 0; i < armyConfiguration.SpecialUnits.Count; i++)
+                {
+                    var specialUnitIndex = i;
+                    var specialUnit = armyConfiguration.SpecialUnits[specialUnitIndex];
+                    if (gameSettings.Elites.ContainsKey(specialUnit.UnitId))
                     {
-                        var c = color;
-                        // TODO - check to make sure this won't complete anything
-                        if (ArmyLayoutMatcher.GetMatches(Drop(armyLayout, column, new StandardUnit("", c, null))).Any())
+                        for (var c = 0; c < ArmyConfiguration.ColorCount; c++)
                         {
-                            continue;
+                            var color = c;
+
+                            yield return (() => new EliteUnit(MakeUnitId(), color, null, specialUnitIndex), specialUnit.Stock);
                         }
-                        yield return (column, () => new StandardUnit(MakeUnitId(), c, null), armyConfiguration.MaxUnitCount);
                     }
+                }
+            }
 
-                    // TODO - elites
-
-                    if (column < ArmyLayout.Columns - 1)
+            if (column < ArmyLayout.Columns - 1)
+            {
+                if (highRankCount < 3 && armyLayout.IsEmpty(column, ArmyLayout.Rows - 2) && armyLayout.IsEmpty(column + 1, ArmyLayout.Rows - 2) && armyLayout.IsEmpty(column + 1, ArmyLayout.Rows - 1))
+                {
+                    for (var i = 0; i < armyConfiguration.SpecialUnits.Count; i++)
                     {
-                        // TODO - champions
+                        var specialUnitIndex = i;
+                        var specialUnit = armyConfiguration.SpecialUnits[specialUnitIndex];
+                        if (gameSettings.Champions.ContainsKey(specialUnit.UnitId))
+                        {
+                            for (var c = 0; c < ArmyConfiguration.ColorCount; c++)
+                            {
+                                var color = c;
+
+                                yield return (() => new ChampionUnit(MakeUnitId(), color, null, specialUnitIndex), specialUnit.Stock);
+                            }
+                        }
                     }
                 }
             }
         }
 
-        private string MakeUnitId() => Guid.NewGuid().ToString();
+        private static string MakeUnitId() => Guid.NewGuid().ToString();
 
-        public ArmyLayout Drop(ArmyLayout armyLayout, int column, UnitInstance unit)
+        public static ArmyLayout Drop(ArmyLayout armyLayout, int column, UnitInstance unit)
         {
             var units = armyLayout.Units.ToImmutableList().ToBuilder();
             switch (unit)
             {
                 case StandardUnit _:
                     {
-                        var row = Enumerable.Range(0, ArmyLayout.Rows).Where(row => armyLayout[column, row] is EmptyPlaceholder).Min();
+                        var row = Enumerable.Range(0, ArmyLayout.Rows - 1)
+                            .Where(row => !armyLayout.IsEmpty(column, row))
+                            .DefaultIfEmpty(-1)
+                            .Select(row => row + 1)
+                            .Max();
                         units[ArmyLayout.GetIndexFor(column, row)] = unit;
                     }
                     break;
                 case EliteUnit _:
                     {
-                        var row = Enumerable.Range(0, ArmyLayout.Rows - 1).Where(row => armyLayout[column, row] is EmptyPlaceholder).Min();
+                        var row = Enumerable.Range(0, ArmyLayout.Rows - 1)
+                            .Where(row => !armyLayout.IsEmpty(column, row))
+                            .DefaultIfEmpty(-1)
+                            .Select(row => row + 1)
+                            .Max();
                         units[ArmyLayout.GetIndexFor(column, row)] = unit;
                         units[ArmyLayout.GetIndexFor(column, row + 1)] = new UnitPart(unit.Id);
                     }
                     break;
                 case ChampionUnit _:
+                    {
+                        var row = Enumerable.Range(0, ArmyLayout.Rows - 1)
+                            .Where(row => !armyLayout.IsEmpty(column, row) || !armyLayout.IsEmpty(column + 1, row))
+                            .DefaultIfEmpty(-1)
+                            .Select(row => row + 1)
+                            .Max();
+                        units[ArmyLayout.GetIndexFor(column, row)] = unit;
+                        units[ArmyLayout.GetIndexFor(column, row + 1)] = new UnitPart(unit.Id);
+                        units[ArmyLayout.GetIndexFor(column + 1, row)] = new UnitPart(unit.Id);
+                        units[ArmyLayout.GetIndexFor(column + 1, row + 1)] = new UnitPart(unit.Id);
+                    }
+                    break;
                 default:
                     throw new NotImplementedException();
             }
