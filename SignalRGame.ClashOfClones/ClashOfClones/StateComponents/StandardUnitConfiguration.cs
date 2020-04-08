@@ -31,9 +31,9 @@ namespace SignalRGame.ClashOfClones
             public T this[int index] =>
                 index switch
                 {
-                    1 => First,
-                    2 => Second,
-                    3 => Third,
+                    0 => First,
+                    1 => Second,
+                    2 => Third,
                     _ => throw new IndexOutOfRangeException()
                 };
         }

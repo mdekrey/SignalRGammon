@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xunit;
+using static SignalRGame.ClashOfClones.Rules.ArmyLayoutAssertionUtilities;
 
 namespace SignalRGame.ClashOfClones.Rules
 {
@@ -335,6 +336,5 @@ namespace SignalRGame.ClashOfClones.Rules
         }
 
 
-        private string NewId() => Guid.NewGuid().ToString();
     }
 }

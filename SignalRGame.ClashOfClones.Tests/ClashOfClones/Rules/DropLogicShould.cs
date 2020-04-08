@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
+using static SignalRGame.ClashOfClones.Rules.ArmyLayoutAssertionUtilities;
 
 namespace SignalRGame.ClashOfClones.Rules
 {
@@ -354,13 +355,6 @@ namespace SignalRGame.ClashOfClones.Rules
                     }
                 )
             );
-        }
-
-        private static Action<UnitPlaceholder>[] GetUnitAssertions(Action<(int column, int row), UnitPlaceholder> assertion)
-        {
-            return Enumerable.Range(0, ArmyLayout.TotalCount)
-                             .Select(index => (Action<UnitPlaceholder>)(unit => assertion(ArmyLayout.GetPositionFor(index), unit)))
-                             .ToArray();
         }
 
         private static DropLogic MakeTarget(params Func<int, int>[] rolls)

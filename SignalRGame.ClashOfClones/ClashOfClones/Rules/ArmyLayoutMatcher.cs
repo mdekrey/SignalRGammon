@@ -59,7 +59,7 @@ namespace SignalRGame.ClashOfClones.Rules
                 .ToArray();
             if (ids.Length < 3)
                 return false;
-            match = new ArmyLayoutMatch(ids, true);
+            match = new ArmyLayoutMatch(ids, true, column, row);
             return true;
         }
 
@@ -76,7 +76,7 @@ namespace SignalRGame.ClashOfClones.Rules
             var ids = GetStandardUnitIds(armyLayout, currentColor, column, row + 1);
             if (ids.Length < 2)
                 return false;
-            match = new ArmyLayoutMatch(new[] { startId }.Concat(ids).ToArray(), false);
+            match = new ArmyLayoutMatch(new[] { startId }.Concat(ids).ToArray(), false, column, row);
             return true;
         }
 
@@ -99,7 +99,7 @@ namespace SignalRGame.ClashOfClones.Rules
             var ids = GetStandardUnitIds(armyLayout, currentColor, column, row + 2);
             if (ids.Length < 2)
                 return false;
-            match = new ArmyLayoutMatch(new[] { startId }.Concat(ids).ToArray(), false);
+            match = new ArmyLayoutMatch(new[] { startId }.Concat(ids).ToArray(), false, column, row);
             return true;
         }
 
@@ -115,7 +115,7 @@ namespace SignalRGame.ClashOfClones.Rules
             var col2Ids = GetStandardUnitIds(armyLayout, currentColor, column + 1, row + 2);
             if (col2Ids.Length < 2)
                 return false;
-            match = new ArmyLayoutMatch(new[] { startId }.Concat(ids).Concat(col2Ids).ToArray(), false);
+            match = new ArmyLayoutMatch(new[] { startId }.Concat(ids).Concat(col2Ids).ToArray(), false, column, row);
             return true;
         }
     }
@@ -124,11 +124,15 @@ namespace SignalRGame.ClashOfClones.Rules
     {
         public IReadOnlyList<string> UnitIds { get; }
         public bool IsWall { get; }
+        public int Column { get; }
+        public int Row { get; }
 
-        public ArmyLayoutMatch(IReadOnlyList<string> ids, bool isWall)
+        public ArmyLayoutMatch(IReadOnlyList<string> ids, bool isWall, int column, int row)
         {
             this.UnitIds = ids;
             this.IsWall = isWall;
+            this.Column = column;
+            this.Row = row;
         }
     }
 }
