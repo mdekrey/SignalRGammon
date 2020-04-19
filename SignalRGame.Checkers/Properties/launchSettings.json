@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "SignalRGame.Checkers": {
+      "commandName": "Project",
+      "commandLineArgs": "--urls http://0.0.0.0:8080",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://localhost:8080"
+    }
+  }
+}

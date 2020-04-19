@@ -1,0 +1,61 @@
+openapi: 3.0.0
+info:
+  title: GameService.v1
+  version: '1.0'
+servers:
+  - url: 'http://localhost:3000'
+paths:
+  '/game-types':
+    get:
+      summary: Gets the game types the server supports
+      tags:
+        - game
+      responses:
+        '200':
+          description: List of game types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+      operationId: get-game-types
+  '/game/{id}/exists':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Gets whether the game with the given ID exists
+      tags:
+        - game
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Not Found
+      operationId: get-game-id-exists
+  '/game/{type}':
+    post:
+      summary: Create Game
+      tags:
+        - game
+      operationId: create-game
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+      description: Creates a new game of the specified type
+    parameters:
+      - schema:
+          type: string
+        name: type
+        in: path
+        required: true
+components:
+  schemas: {}

@@ -17,12 +17,12 @@
     },
     "SignalRGame.Server": {
       "commandName": "Project",
-      "commandLineArgs": "--urls http://0.0.0.0:5000",
+      "commandLineArgs": "--urls http://0.0.0.0:6000",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://localhost:5000"
+      "applicationUrl": "http://localhost:6000"
     },
     "Docker": {
       "commandName": "Docker",

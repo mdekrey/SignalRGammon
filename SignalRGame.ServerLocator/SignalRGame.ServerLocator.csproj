@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UserSecretsId>3e4803dd-8eb7-4b8d-81ac-73fe2f97ab98</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <OpenApiSchemaMvcServer Include="..\server-discovery.yaml" Link="Controllers\server-discovery.yaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.3" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.9.5" />
+    <PackageReference Include="PrincipleStudios.OpenApiCodegen.Server.Mvc" Version="0.1.0-alpha.1" />
+    <PackageReference Include="PrincipleStudios.OpenApiCodegen.Client" Version="0.1.0-alpha.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <OpenApiSchemaClient Include="..\game-service.yaml" Link="Clients\game-service.yaml" />
+  </ItemGroup>
+
+
+</Project>

@@ -1,0 +1,92 @@
+openapi: 3.0.0
+info:
+  title: DiscoveryServer
+  version: '1.0'
+servers:
+  - url: 'http://localhost:3000'
+paths:
+  /game-types:
+    get:
+      summary: Gets a list of game types available
+      tags:
+        - game
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+      operationId: get-games
+      description: Gets a list of game types available
+    parameters: []
+  '/game-types/{gameType}':
+    parameters:
+      - schema:
+          type: string
+        name: gameType
+        in: path
+        required: true
+    post:
+      summary: Creates a new game of the type specified
+      tags:
+        - game
+      responses:
+        '400':
+          description: Unknown game type
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+      operationId: create-game
+      description: Creates a new game of the type specified
+  '/game/{type}/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: type
+        in: path
+        required: true
+    get:
+      summary: "Locates a game's server by id"
+      tags:
+        - game
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerDefinition'
+        '404':
+          description: Not found
+      operationId: get-game-by-id
+      description: "Locates a game's server by id"
+components:
+  schemas:
+    ServerDefinition:
+      title: ServerDefinition
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+    Game:
+      title: Game
+      type: object
+      properties:
+        id:
+          type: string
+        gameType:
+          type: string
+        server:
+          $ref: '#/components/schemas/ServerDefinition'
