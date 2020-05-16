@@ -18,6 +18,10 @@ namespace SignalRGame
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureHostConfiguration(configBuilder =>
+                {
+                    configBuilder.AddJsonFile("appSettings.local.json", optional: true);
+                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
