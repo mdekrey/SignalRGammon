@@ -8,7 +8,7 @@ using SignalRGame.GameUtilities;
 namespace SignalRGame.GameServer
 {
     public class Startup<TGameType>
-        where TGameType : class, ISingleGameFactory
+        where TGameType : class, ILocalizedGameFactory
     {
         public Startup(IConfiguration configuration)
         {
@@ -20,7 +20,7 @@ namespace SignalRGame.GameServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddTransient<ISingleGameFactory, TGameType>();
+            services.AddTransient<ILocalizedGameFactory, TGameType>();
             services.AddControllers().AddNewtonsoftJson().AddApplicationPart(this.GetType().Assembly);
         }
 
@@ -40,6 +40,8 @@ namespace SignalRGame.GameServer
             {
                 endpoints.MapControllers();
             });
+
+            app.UseStaticFiles();
         }
     }
 }

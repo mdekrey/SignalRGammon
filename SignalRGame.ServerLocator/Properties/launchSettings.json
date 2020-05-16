@@ -7,7 +7,7 @@
       "launchUrl": "",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "GAME_SERVERS": "http://localhost:8080"
+        "GAME_SERVERS": "http://localhost:8080,http://localhost:8080"
       },
       "applicationUrl": "http://localhost:5000"
     },

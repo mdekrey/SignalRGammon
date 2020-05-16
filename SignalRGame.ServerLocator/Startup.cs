@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using SignalRGame.Discovery;
 
 namespace SignalRGame.ServerLocator
 {
@@ -27,8 +28,10 @@ namespace SignalRGame.ServerLocator
         public void ConfigureServices(IServiceCollection services)
         {
             // TODO - detect kubernetes
-            services.AddTransient<Discovery.IServerDiscovery>(sp => new Discovery.ConfigurationServerDiscovery(Configuration["GAME_SERVERS"].Split(',')));
-            services.AddTransient<Clients.IGameServers, Clients.GameServers>();
+            services.AddTransient<IServerDiscovery>(sp => new ConfigurationServerDiscovery((from gameServer in Configuration["GAME_SERVERS"].Split(';')
+                                                                                                               let parts = gameServer.Split(',')
+                                                                                                               select new ServerDetails(parts[0], parts[parts.Length == 1 ? 0: 1])).ToArray()));
+            services.AddTransient<IGameServers, GameServers>();
             services.AddTransient<Clients.IGameClientFactory>(sp => sp.GetRequiredService<Clients.GameClientFactory>());
 
             services.AddHttpClient<Clients.GameClientFactory>();

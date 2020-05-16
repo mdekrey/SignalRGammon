@@ -5,21 +5,6 @@ info:
 servers:
   - url: 'http://localhost:3000'
 paths:
-  '/game-types':
-    get:
-      summary: Gets the game types the server supports
-      tags:
-        - game
-      responses:
-        '200':
-          description: List of game types
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: string
-      operationId: get-game-types
   '/game/{id}/exists':
     parameters:
       - schema:
@@ -40,8 +25,6 @@ paths:
   '/game/{type}':
     post:
       summary: Create Game
-      tags:
-        - game
       operationId: create-game
       responses:
         '200':
@@ -51,11 +34,43 @@ paths:
               schema:
                 type: string
       description: Creates a new game of the specified type
+      tags:
+        - game
     parameters:
       - schema:
           type: string
         name: type
         in: path
         required: true
+  /game-types:
+    get:
+      summary: Gets the game types the server supports
+      tags:
+        - game
+      responses:
+        '200':
+          description: List of game types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GameType'
+      operationId: get-game-types
 components:
-  schemas: {}
+  schemas:
+    GameType:
+      title: GameType
+      type: object
+      properties:
+        iconUrl:
+          type: string
+          format: uri
+        displayName:
+          type: string
+        gameType:
+          type: string
+      required:
+        - iconUrl
+        - displayName
+        - gameType

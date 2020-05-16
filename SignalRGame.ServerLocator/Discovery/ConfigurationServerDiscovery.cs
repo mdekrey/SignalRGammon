@@ -7,13 +7,14 @@ namespace SignalRGame.Discovery
 {
     public class ConfigurationServerDiscovery : IServerDiscovery
     {
-        private readonly IReadOnlyList<string> gameServers;
+        private readonly IReadOnlyList<ServerDetails> gameServers;
 
-        public ConfigurationServerDiscovery(IReadOnlyList<string> gameServers)
+        public ConfigurationServerDiscovery(IReadOnlyList<ServerDetails> gameServers)
         {
             this.gameServers = gameServers;
         }
 
-        public IEnumerable<string> GetGameServers() => gameServers;
+        public IEnumerable<ServerDetails> GetGameServers() => gameServers;
+
     }
 }

@@ -4,17 +4,20 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SignalRGame.Controllers
+namespace SignalRGame.GameServer
 {
     public class GameController : GameApiControllerBase
     {
-        private readonly ISingleGameFactory singleGameFactory;
-        private readonly IReadOnlyList<string> types;
+        private readonly ILocalizedGameFactory singleGameFactory;
+        private readonly IReadOnlyList<GameType> types;
 
-        public GameController(ISingleGameFactory singleGameFactory)
+        public GameController(ILocalizedGameFactory singleGameFactory)
         {
             this.singleGameFactory = singleGameFactory;
-            this.types = new[] { singleGameFactory.Type };
+            this.types = new[]
+            {
+                new GameType(singleGameFactory.IconUrl, singleGameFactory.DisplayName, singleGameFactory.Type)
+            };
         }
 
         public override Task<TypeSafeCreateGameResult> CreateGameTypeSafe(string type)

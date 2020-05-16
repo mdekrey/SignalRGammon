@@ -18,32 +18,10 @@ paths:
               schema:
                 type: array
                 items:
-                  type: string
-      operationId: get-games
+                  $ref: '#/components/schemas/GameType'
+      operationId: get-game-types
       description: Gets a list of game types available
     parameters: []
-  '/game-types/{gameType}':
-    parameters:
-      - schema:
-          type: string
-        name: gameType
-        in: path
-        required: true
-    post:
-      summary: Creates a new game of the type specified
-      tags:
-        - game
-      responses:
-        '400':
-          description: Unknown game type
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Game'
-      operationId: create-game
-      description: Creates a new game of the type specified
   '/game/{type}/{id}':
     parameters:
       - schema:
@@ -71,6 +49,28 @@ paths:
           description: Not found
       operationId: get-game-by-id
       description: "Locates a game's server by id"
+  '/game/{gameType}':
+    parameters:
+      - schema:
+          type: string
+        name: gameType
+        in: path
+        required: true
+    post:
+      summary: Creates a new game of the type specified
+      tags:
+        - game
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '400':
+          description: Unknown game type
+      operationId: create-game
+      description: Creates a new game of the type specified
 components:
   schemas:
     ServerDefinition:
@@ -80,6 +80,8 @@ components:
         url:
           type: string
           format: uri
+      required:
+        - url
     Game:
       title: Game
       type: object
@@ -90,3 +92,22 @@ components:
           type: string
         server:
           $ref: '#/components/schemas/ServerDefinition'
+      required:
+        - id
+        - server
+        - gameType
+    GameType:
+      title: GameType
+      type: object
+      properties:
+        gameType:
+          type: string
+        displayName:
+          type: string
+        iconUrl:
+          type: string
+          format: uri
+      required:
+        - gameType
+        - displayName
+        - iconUrl

@@ -1,4 +1,4 @@
-﻿namespace SignalRGame.Clients
+﻿namespace SignalRGame.Discovery
 {
     public readonly struct GameDetails
     {

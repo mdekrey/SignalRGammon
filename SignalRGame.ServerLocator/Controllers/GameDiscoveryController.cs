@@ -1,4 +1,5 @@
 ﻿using SignalRGame.Clients;
+using SignalRGame.Discovery;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,11 +18,12 @@ namespace SignalRGame.Controllers
 
         public override async Task<TypeSafeGetGameByIdResult> GetGameByIdTypeSafe(string id, string type)
         {
-            var serverUrl = await gameServerDetails.FindGameServerAsync(id, type);
+            var server = await gameServerDetails.FindGameServerAsync(id, type);
 
-            if (serverUrl == null)
-                return TypeSafeGetGameByIdResult.StatusCode404();
-            return TypeSafeGetGameByIdResult.StatusCode200(new ServerDefinition(serverUrl));
+            return server switch {
+                ServerDetails { PublicUrl: var serverUrl } => TypeSafeGetGameByIdResult.StatusCode200(new ServerDefinition(serverUrl)),
+                _ => TypeSafeGetGameByIdResult.StatusCode404()
+            };
         }
 
         public override async Task<TypeSafeCreateGameResult> CreateGameTypeSafe(string gameType)
@@ -35,13 +37,13 @@ namespace SignalRGame.Controllers
                     game.Id,
                     gameType,
                     new ServerDefinition(game.ServerUrl)
-                ))
+                ))  
             };
         }
 
-        public override async Task<TypeSafeGetGamesResult> GetGamesTypeSafe()
+        public override async Task<TypeSafeGetGameTypesResult> GetGameTypesTypeSafe()
         {
-            return TypeSafeGetGamesResult.StatusCode200(await gameServerDetails.GetAllGameTypesAsync());
+            return TypeSafeGetGameTypesResult.StatusCode200(await gameServerDetails.GetAllGameTypesAsync());
 
         }
     }

@@ -7,6 +7,6 @@ namespace SignalRGame.Discovery
 {
     public interface IServerDiscovery
     {
-        IEnumerable<string> GetGameServers();
+        IEnumerable<ServerDetails> GetGameServers();
     }
 }

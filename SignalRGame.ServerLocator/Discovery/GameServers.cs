@@ -1,11 +1,12 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
+using SignalRGame.Clients;
 using SignalRGame.Discovery;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SignalRGame.Clients
+namespace SignalRGame.Discovery
 {
     public class GameServers : IGameServers
     {
@@ -22,57 +23,66 @@ namespace SignalRGame.Clients
 
         public async Task<GameDetails?> CreateGameAsync(string gameType)
         {
-            var servers = (from s in await GetTypesForAllServers()
-                           where s.types.Contains(gameType)
-                           select s.server).ToArray();
+            var servers = (await GetServersSupportingGameType(gameType)).ToArray();
             if (servers.Length == 0)
                 return null;
 
             // TODO - better logic here, such as load awareness, etc.
             var gameServer = servers[0];
 
-            var client = gameClientFactory.CreateGameApiClient(gameServer);
+            var client = gameClientFactory.CreateGameApiClient(gameServer.InternalUrl);
             using var createGameResponse = await client.CreateGameAsync(gameType);
             if (createGameResponse.StatusCode != System.Net.HttpStatusCode.OK)
                 return null;
             var game = await createGameResponse.StatusCode200Async();
-            return new GameDetails(game, gameServer);
+            return new GameDetails(game, gameServer.PublicUrl);
         }
 
-        public async Task<string?> FindGameServerAsync(string id, string gameType)
+        public async Task<ServerDetails?> FindGameServerAsync(string id, string gameType)
         {
-            foreach (var gameServer in from s in await GetTypesForAllServers()
-                                   where s.types.Contains(gameType)
-                                   select s.server)
+            foreach (var gameServer in await GetServersSupportingGameType(gameType))
             {
-                var client = gameClientFactory.CreateGameApiClient(gameServer);
+                var client = gameClientFactory.CreateGameApiClient(gameServer.InternalUrl);
                 using var findGameResponse = await client.GetGameIdExistsAsync(id);
                 return findGameResponse.Response.IsSuccessStatusCode
-                    ? gameServer
+                    ? (ServerDetails?)gameServer
                     : null;
             }
 
             return null;
         }
 
-        public async Task<IReadOnlyList<string>> GetAllGameTypesAsync()
+        private async Task<IEnumerable<ServerDetails>> GetServersSupportingGameType(string gameType)
+        {
+            return from s in await GetTypesForAllServers()
+                   where s.types.Select(t => t._GameType).Contains(gameType)
+                   select s.server;
+        }
+
+        public async Task<IReadOnlyList<Controllers.GameType>> GetAllGameTypesAsync()
         {
             return (from servers in await GetTypesForAllServers()
                     from gameType in servers.types
-                    select gameType)
+                    group (IconUrl: servers.server.PublicUrl + gameType.IconUrl, gameType.DisplayName) by gameType._GameType into gameType
+                    select new Controllers.GameType(
+                        gameType.Key,
+                        // TODO - better logic here, such as load awareness, etc.
+                        gameType.First().DisplayName,
+                        gameType.First().IconUrl
+                    ))
                 .Distinct()
                 .ToArray();
         }
 
-        private async Task<(string server, IReadOnlyList<string> types)[]> GetTypesForAllServers()
+        private async Task<(ServerDetails server, IReadOnlyList<GameType> types)[]> GetTypesForAllServers()
         {
             return await Task.WhenAll(from server in serverDiscovery.GetGameServers()
-                                      select AsTask(async () => (server, types: await GetGameTypesByServer(server))));
+                                      select AsTask(async () => (server, types: await GetGameTypesByServer(server.InternalUrl))));
         }
 
         private static Task<T> AsTask<T>(Func<Task<T>> asyncFunc) => asyncFunc();
 
-        private Task<IReadOnlyList<string>> GetGameTypesByServer(string server)
+        private Task<IReadOnlyList<GameType>> GetGameTypesByServer(string server)
         {
             return memoryCache.GetOrCreateAsync(server, async entry =>
             {
@@ -92,7 +102,7 @@ namespace SignalRGame.Clients
                 }
                 // TODO - use poly for a backoff here
                 entry.SetAbsoluteExpiration(DateTimeOffset.Now.AddSeconds(60));
-                return Array.Empty<string>();
+                return Array.Empty<GameType>();
             });
         }
     }

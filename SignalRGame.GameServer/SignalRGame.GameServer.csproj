@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <OpenApiSchemaMvcServer Include="..\game-service.yaml" Link="Controllers\game-service.yaml" />
+    <OpenApiSchemaMvcServer Include="..\game-service.yaml" Link="GameServer\game-service.yaml" />
   </ItemGroup>
 
   <ItemGroup>
