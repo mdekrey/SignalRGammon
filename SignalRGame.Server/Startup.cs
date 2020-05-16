@@ -9,6 +9,10 @@ using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SignalRGame.GameUtilities;
+using Jaeger;
+using Jaeger.Samplers;
+using OpenTracing;
+using Microsoft.Extensions.Logging;
 
 namespace SignalRGame
 {
@@ -18,6 +22,29 @@ namespace SignalRGame
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddOpenTracingCoreServices(builder =>
+            {
+                builder.AddAspNetCore()
+                    .AddCoreFx();
+            });
+
+            services.AddSingleton<ITracer>(serviceProvider =>
+            {
+                string serviceName = serviceProvider.GetRequiredService<IWebHostEnvironment>().ApplicationName;
+
+                // This will log to a default localhost installation of Jaeger.
+                var tracer = new Tracer.Builder(serviceName)
+                    .WithSampler(new RemoteControlledSampler.Builder(serviceName).WithInitialSampler(new ConstSampler(true)).Build())
+                    .Build();
+
+                // Allows code that can't use DI to also access the tracer.
+                OpenTracing.Util.GlobalTracer.Register(tracer);
+
+                return tracer;
+            });
+
+            services.AddSingleton<ILoggerProvider, Logging.OpenTracingLoggerProvider>();
+
             services.AddMemoryCache();
             services.AddSignalR();
             services.AddGameFactory();
