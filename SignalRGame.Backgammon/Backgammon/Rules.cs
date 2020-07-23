@@ -21,45 +21,46 @@ namespace SignalRGame.Backgammon
             this.dieRoller = dieRoller;
         }
 
-        public async Task CheckAutomaticActions(BackgammonState state, ActionDispatcher dispatch)
+        public (BackgammonAction? action, bool hasAction) GetAutomaticActions(BackgammonState state)
         {
             try
             {
                 switch (state)
                 {
                     case { Winner: null, CurrentPlayer: null, DiceRolls: { White: { Count: 1 }, Black: { Count: 1 } } }:
-                        await dispatch(new BackgammonSetStartingPlayer());
-                        break;
+                        return (new BackgammonSetStartingPlayer(), true);
                     case { Winner: null, DiceRolls: { White: { Count: 0 }, Black: { Count: 0 } } }:
-                        await CheckForWinner(state, dispatch);
-                        break;
+                        return CheckForWinner(state);
                     case { Winner: null, CurrentPlayer: Player player, DiceRolls: var diceRolls } when diceRolls[player].Count > 0:
-                        await DoInvalidDieRolls(state, dispatch);
-                        break;
+                        return DoInvalidDieRolls(state);
+                    default:
+                        return (null, false);
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
+                return (null, false);
             }
         }
 
-        private async Task CheckForWinner(BackgammonState state, ActionDispatcher dispatch)
+        private (BackgammonAction? action, bool hasAction) CheckForWinner(BackgammonState state)
         {
             if (state.Points.All(p => p.White == 0))
             {
-                await dispatch(new BackgammonDeclareWinner { Player = Player.White });
+                return (new BackgammonDeclareWinner { Player = Player.White }, true);
             }
             else if (state.Points.All(p => p.Black == 0))
             {
-                await dispatch(new BackgammonDeclareWinner { Player = Player.Black });
+                return (new BackgammonDeclareWinner { Player = Player.Black }, true);
             }
+            return (null, false);
         }
 
-        private async Task DoInvalidDieRolls(BackgammonState state, ActionDispatcher dispatch)
+        private (BackgammonAction? action, bool hasAction) DoInvalidDieRolls(BackgammonState state)
         {
             if (!(state.CurrentPlayer is Player player))
-                return;
+                return (null, false);
 
             var orderedDice = state.DiceRolls[player].OrderBy(v => v).ToArray();
             var validFirstStates = (from die in orderedDice
@@ -68,11 +69,11 @@ namespace SignalRGame.Backgammon
             if (validFirstStates.All(e => e.Count() == 0))
             {
                 // no valid moves
-                await dispatch(new BackgammonCannotUseRoll { DieValues = orderedDice });
-                return;
+                return (new BackgammonCannotUseRoll { DieValues = orderedDice }, true);
             }
 
             // We can't really remove other dice due to it maybe becoming valid in a different order; we'd have to disable dice in the first round, which isn't exactly something currently in the state machine...
+            return (null, false);
         }
 
         IEnumerable<BackgammonState> ValidStates(BackgammonState obj, int dieRoll)

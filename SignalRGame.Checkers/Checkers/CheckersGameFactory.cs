@@ -10,6 +10,6 @@ namespace SignalRGame.Checkers
         public string Type => "checkers";
 
         public IGame CreateGame() =>
-            new Checkers.CheckersGame();
+            new CheckersGame().CreateInMemoryGame();
     }
 }

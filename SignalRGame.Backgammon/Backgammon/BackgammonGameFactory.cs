@@ -10,6 +10,6 @@ namespace SignalRGame.Backgammon
         public string Type => "backgammon";
 
         public IGame CreateGame() =>
-            new BackgammonGame(new DieRoller());
+            new BackgammonGame(new DieRoller()).CreateInMemoryGame();
     }
 }

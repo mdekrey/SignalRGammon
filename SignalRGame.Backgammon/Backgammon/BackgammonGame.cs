@@ -1,23 +1,26 @@
 ﻿using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using SignalRGame.GameUtilities;
 
 namespace SignalRGame.Backgammon
 {
 
-    public class BackgammonGame : GameBase<BackgammonState, BackgammonState, BackgammonAction?>
+    public class BackgammonGame : IGameLogic<BackgammonState, BackgammonState, BackgammonAction?>
     {
         private readonly Rules rules;
 
-        public BackgammonGame(IDieRoller dieRoller) : base(BackgammonState.DefaultState())
+        public BackgammonGame(IDieRoller dieRoller)
         {
             rules = new Rules(dieRoller);
         }
 
-        protected override BackgammonState GetExternalState(BackgammonState state) => state;
-        protected override Task<(BackgammonState newState, bool isValid)> ApplyAction(BackgammonState state, BackgammonAction? action) =>
-            Task.FromResult(rules.ApplyAction(state, action));
-        protected override Task CheckAutomaticActions(BackgammonState state) =>
-            rules?.CheckAutomaticActions(state, Do) ?? Task.CompletedTask;
+        public BackgammonState InitialState() => BackgammonState.DefaultState();
+
+        public (BackgammonState newState, bool isValid) PerformAction(BackgammonState state, BackgammonAction? action, ClaimsPrincipal? user) => rules.ApplyAction(state, action);
+
+        public (BackgammonAction? action, bool hasAction) GetRecommendedAction(BackgammonState state, ClaimsPrincipal? user) => rules.GetAutomaticActions(state);
+
+        public BackgammonState ToPublicGameState(BackgammonState state, ClaimsPrincipal? user) => state;
     }
 }

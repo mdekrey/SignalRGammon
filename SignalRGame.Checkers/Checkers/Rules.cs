@@ -88,5 +88,16 @@ namespace SignalRGame.Checkers
                     return;
             }
         }
+
+        public static (CheckersAction? action, bool hasAction) GetAutomaticAction(CheckersState state)
+        {
+            switch (state)
+            {
+                case { Winner: null } when !CheckersExternalState.GetValidMoves(state).Any():
+                    return (new CheckersCannotMove(), true);
+                default:
+                    return (null, false);
+            }
+        }
     }
 }

@@ -4,24 +4,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace SignalRGame.Checkers
 {
-    public class CheckersGame : GameBase<CheckersExternalState, CheckersState, CheckersAction?>, IGame
+    public class CheckersGame : IGameLogic<CheckersState, CheckersExternalState, CheckersAction?>
     {
-        public CheckersGame() : base(Defaults.DefaultState)
-        {
-        }
+        public (CheckersAction? action, bool hasAction) GetRecommendedAction(CheckersState state, ClaimsPrincipal? user) => Rules.GetAutomaticAction(state);
 
-        IObservable<string> IGame.JsonStates =>
-            States
-                .Select(s => JsonConvert.SerializeObject(new { state = s.state.State, validMovesForCurrentPlayer = s.state.ValidMovesForCurrentPlayer, s.action }, JsonSettings));
+        public CheckersState InitialState() => Defaults.DefaultState;
 
-        protected override CheckersExternalState GetExternalState(CheckersState state) => new CheckersExternalState(state);
-        protected override Task<(CheckersState newState, bool isValid)> ApplyAction(CheckersState state, CheckersAction? action) =>
-            Task.FromResult(Rules.ApplyAction(state, action));
-        protected override Task CheckAutomaticActions(CheckersState state) =>
-            Rules.CheckAutomaticActions(state, Do) ?? Task.CompletedTask;
+        public (CheckersState newState, bool isValid) PerformAction(CheckersState state, CheckersAction? action, ClaimsPrincipal? user) => Rules.ApplyAction(state, action);
+
+        public CheckersExternalState ToPublicGameState(CheckersState state, ClaimsPrincipal? user) => new CheckersExternalState(state);
     }
 }

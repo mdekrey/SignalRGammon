@@ -17,7 +17,7 @@ namespace SignalRGame.Backgammon
         public static PointState NoCheckers() => new PointState(black: 0, white: 0);
 
         [Fact]
-        public async Task CatchWhenNoMovesCanBeMadeByBlack()
+        public void CatchWhenNoMovesCanBeMadeByBlack()
         {
             var rules = new Rules(new FakeDieRoller());
             var state = BackgammonState.DefaultState()
@@ -55,29 +55,18 @@ namespace SignalRGame.Backgammon
                     Bar: new PointState(0, 0)
                 );
 
-            var actions = new List<BackgammonAction>();
-            Task<bool> ExpectedDispatch(BackgammonAction arg)
-            {
-                actions.Add(arg);
-                return Task.FromResult(true);
-            }
-            await rules.CheckAutomaticActions(state, ExpectedDispatch);
+            var (invalid, hasAction) = rules.GetAutomaticActions(state);
+            Assert.True(hasAction);
 
-            Assert.Collection(
-                actions,
-                invalid =>
-                {
-                    var rolls = Assert.IsType<BackgammonCannotUseRoll>(invalid);
-                    Assert.Collection(rolls.DieValues,
-                        a => Assert.Equal(4, a),
-                        a => Assert.Equal(5, a)
-                    );
-                }
+            var rolls = Assert.IsType<BackgammonCannotUseRoll>(invalid);
+            Assert.Collection(rolls.DieValues,
+                a => Assert.Equal(4, a),
+                a => Assert.Equal(5, a)
             );
         }
 
         [Fact]
-        public async Task CatchWhenCannotMoveOffBarByBlack()
+        public void CatchWhenCannotMoveOffBarByBlack()
         {
             var rules = new Rules(new FakeDieRoller());
             var state = BackgammonState.DefaultState()
@@ -115,28 +104,17 @@ namespace SignalRGame.Backgammon
                     Bar: new PointState(white: 0, black: 1)
                 );
 
-            var actions = new List<BackgammonAction>();
-            Task<bool> ExpectedDispatch(BackgammonAction arg)
-            {
-                actions.Add(arg);
-                return Task.FromResult(true);
-            }
-            await rules.CheckAutomaticActions(state, ExpectedDispatch);
+            var (invalid, hasAction) = rules.GetAutomaticActions(state);
+            Assert.True(hasAction);
 
-            Assert.Collection(
-                actions,
-                invalid =>
-                {
-                    var rolls = Assert.IsType<BackgammonCannotUseRoll>(invalid);
-                    Assert.Collection(rolls.DieValues,
-                        a => Assert.Equal(6, a)
-                    );
-                }
+            var rolls = Assert.IsType<BackgammonCannotUseRoll>(invalid);
+            Assert.Collection(rolls.DieValues,
+                a => Assert.Equal(6, a)
             );
         }
 
         [Fact]
-        public async Task AllowValidMovesByBlack()
+        public void AllowValidMovesByBlack()
         {
             var rules = new Rules(new FakeDieRoller());
             var state = BackgammonState.DefaultState()
@@ -174,19 +152,12 @@ namespace SignalRGame.Backgammon
                     Bar: new PointState(0, 0)
                 );
 
-            var actions = new List<BackgammonAction>();
-            Task<bool> ExpectedDispatch(BackgammonAction arg)
-            {
-                actions.Add(arg);
-                return Task.FromResult(true);
-            }
-            await rules.CheckAutomaticActions(state, ExpectedDispatch);
-
-            Assert.Empty(actions);
+            var (_, hasAction) = rules.GetAutomaticActions(state);
+            Assert.False(hasAction);
         }
 
         [Fact]
-        public async Task AllowValidMovesByBlackInOrder()
+        public void AllowValidMovesByBlackInOrder()
         {
             var rules = new Rules(new FakeDieRoller());
             var state = BackgammonState.DefaultState()
@@ -224,19 +195,12 @@ namespace SignalRGame.Backgammon
                     Bar: new PointState(0, 0)
                 );
 
-            var actions = new List<BackgammonAction>();
-            Task<bool> ExpectedDispatch(BackgammonAction arg)
-            {
-                actions.Add(arg);
-                return Task.FromResult(true);
-            }
-            await rules.CheckAutomaticActions(state, ExpectedDispatch);
-
-            Assert.Empty(actions);
+            var (_, hasAction) = rules.GetAutomaticActions(state);
+            Assert.False(hasAction);
         }
 
         [Fact(Skip = "We can't really remove other dice due to it maybe becoming valid in a different order; we'd have to disable dice in the first round, which isn't exactly something currently in the state machine...")]
-        public async Task CatchWhenOnlyOneMoveCanBeMadeByBlack()
+        public void CatchWhenOnlyOneMoveCanBeMadeByBlack()
         {
             var rules = new Rules(new FakeDieRoller());
             var state = BackgammonState.DefaultState()
@@ -274,28 +238,17 @@ namespace SignalRGame.Backgammon
                     Bar: new PointState(0, 0)
                 );
 
-            var actions = new List<BackgammonAction>();
-            Task<bool> ExpectedDispatch(BackgammonAction arg)
-            {
-                actions.Add(arg);
-                return Task.FromResult(true);
-            }
-            await rules.CheckAutomaticActions(state, ExpectedDispatch);
+            var (invalid, hasAction) = rules.GetAutomaticActions(state);
+            Assert.True(hasAction);
 
-            Assert.Collection(
-                actions,
-                invalid =>
-                {
-                    var rolls = Assert.IsType<BackgammonCannotUseRoll>(invalid);
-                    Assert.Collection(rolls.DieValues,
-                        a => Assert.Equal(4, a)
-                    );
-                }
+            var rolls = Assert.IsType<BackgammonCannotUseRoll>(invalid);
+            Assert.Collection(rolls.DieValues,
+                a => Assert.Equal(4, a)
             );
         }
 
         [Fact]
-        public async Task RemovesDiceWhenBlackWins()
+        public void RemovesDiceWhenBlackWins()
         {
             var rules = new Rules(new FakeDieRoller());
             var state = BackgammonState.DefaultState()
@@ -333,28 +286,17 @@ namespace SignalRGame.Backgammon
                     Bar: new PointState(0, 0)
                 );
 
-            var actions = new List<BackgammonAction>();
-            Task<bool> ExpectedDispatch(BackgammonAction arg)
-            {
-                actions.Add(arg);
-                return Task.FromResult(true);
-            }
-            await rules.CheckAutomaticActions(state, ExpectedDispatch);
+            var (invalid, hasAction) = rules.GetAutomaticActions(state);
+            Assert.True(hasAction);
 
-            Assert.Collection(
-                actions,
-                invalid =>
-                {
-                    var rolls = Assert.IsType<BackgammonCannotUseRoll>(invalid);
-                    Assert.Collection(rolls.DieValues,
-                        a => Assert.Equal(5, a)
-                    );
-                }
+            var rolls = Assert.IsType<BackgammonCannotUseRoll>(invalid);
+            Assert.Collection(rolls.DieValues,
+                a => Assert.Equal(5, a)
             );
         }
 
         [Fact]
-        public async Task CatchWhenNoMovesCanBeMadeByWhite()
+        public void CatchWhenNoMovesCanBeMadeByWhite()
         {
             var rules = new Rules(new FakeDieRoller());
             var state = BackgammonState.DefaultState()
@@ -392,29 +334,19 @@ namespace SignalRGame.Backgammon
                     Bar: new PointState(0, 0)
                 );
 
-            var actions = new List<BackgammonAction>();
-            Task<bool> ExpectedDispatch(BackgammonAction arg)
-            {
-                actions.Add(arg);
-                return Task.FromResult(true);
-            }
-            await rules.CheckAutomaticActions(state, ExpectedDispatch);
 
-            Assert.Collection(
-                actions,
-                invalid =>
-                {
-                    var rolls = Assert.IsType<BackgammonCannotUseRoll>(invalid);
-                    Assert.Collection(rolls.DieValues,
-                        a => Assert.Equal(4, a),
-                        a => Assert.Equal(5, a)
-                    );
-                }
+            var (invalid, hasAction) = rules.GetAutomaticActions(state);
+            Assert.True(hasAction);
+
+            var rolls = Assert.IsType<BackgammonCannotUseRoll>(invalid);
+            Assert.Collection(rolls.DieValues,
+                a => Assert.Equal(4, a),
+                a => Assert.Equal(5, a)
             );
         }
 
         [Fact]
-        public async Task CatchWhenCannotMoveOffBarByWhite()
+        public void CatchWhenCannotMoveOffBarByWhite()
         {
             var rules = new Rules(new FakeDieRoller());
             var state = BackgammonState.DefaultState()
@@ -452,28 +384,18 @@ namespace SignalRGame.Backgammon
                     Bar: new PointState(white: 1, black: 0)
                 );
 
-            var actions = new List<BackgammonAction>();
-            Task<bool> ExpectedDispatch(BackgammonAction arg)
-            {
-                actions.Add(arg);
-                return Task.FromResult(true);
-            }
-            await rules.CheckAutomaticActions(state, ExpectedDispatch);
 
-            Assert.Collection(
-                actions,
-                invalid =>
-                {
-                    var rolls = Assert.IsType<BackgammonCannotUseRoll>(invalid);
-                    Assert.Collection(rolls.DieValues,
-                        a => Assert.Equal(6, a)
-                    );
-                }
+            var (invalid, hasAction) = rules.GetAutomaticActions(state);
+            Assert.True(hasAction);
+
+            var rolls = Assert.IsType<BackgammonCannotUseRoll>(invalid);
+            Assert.Collection(rolls.DieValues,
+                a => Assert.Equal(6, a)
             );
         }
 
         [Fact]
-        public async Task AllowValidMovesByWhite()
+        public void AllowValidMovesByWhite()
         {
             var rules = new Rules(new FakeDieRoller());
             var state = BackgammonState.DefaultState()
@@ -511,19 +433,12 @@ namespace SignalRGame.Backgammon
                     Bar: new PointState(0, 0)
                 );
 
-            var actions = new List<BackgammonAction>();
-            Task<bool> ExpectedDispatch(BackgammonAction arg)
-            {
-                actions.Add(arg);
-                return Task.FromResult(true);
-            }
-            await rules.CheckAutomaticActions(state, ExpectedDispatch);
-
-            Assert.Empty(actions);
+            var (_, hasAction) = rules.GetAutomaticActions(state);
+            Assert.False(hasAction);
         }
 
         [Fact]
-        public async Task AllowValidMovesByWhiteInOrder()
+        public void AllowValidMovesByWhiteInOrder()
         {
             var rules = new Rules(new FakeDieRoller());
             var state = BackgammonState.DefaultState()
@@ -561,19 +476,12 @@ namespace SignalRGame.Backgammon
                     Bar: new PointState(0, 0)
                 );
 
-            var actions = new List<BackgammonAction>();
-            Task<bool> ExpectedDispatch(BackgammonAction arg)
-            {
-                actions.Add(arg);
-                return Task.FromResult(true);
-            }
-            await rules.CheckAutomaticActions(state, ExpectedDispatch);
-
-            Assert.Empty(actions);
+            var (_, hasAction) = rules.GetAutomaticActions(state);
+            Assert.False(hasAction);
         }
 
         [Fact(Skip = "We can't really remove other dice due to it maybe becoming valid in a different order; we'd have to disable dice in the first round, which isn't exactly something currently in the state machine...")]
-        public async Task CatchWhenOnlyOneMoveCanBeMadeByWhite()
+        public void CatchWhenOnlyOneMoveCanBeMadeByWhite()
         {
             var rules = new Rules(new FakeDieRoller());
             var state = BackgammonState.DefaultState()
@@ -611,28 +519,17 @@ namespace SignalRGame.Backgammon
                     Bar: new PointState(0, 0)
                 );
 
-            var actions = new List<BackgammonAction>();
-            Task<bool> ExpectedDispatch(BackgammonAction arg)
-            {
-                actions.Add(arg);
-                return Task.FromResult(true);
-            }
-            await rules.CheckAutomaticActions(state, ExpectedDispatch);
+            var (invalid, hasAction) = rules.GetAutomaticActions(state);
+            Assert.True(hasAction);
 
-            Assert.Collection(
-                actions,
-                invalid =>
-                {
-                    var rolls = Assert.IsType<BackgammonCannotUseRoll>(invalid);
-                    Assert.Collection(rolls.DieValues,
-                        a => Assert.Equal(4, a)
-                    );
-                }
+            var rolls = Assert.IsType<BackgammonCannotUseRoll>(invalid);
+            Assert.Collection(rolls.DieValues,
+                a => Assert.Equal(4, a)
             );
         }
 
         [Fact]
-        public async Task RemovesDiceWhenWhiteWins()
+        public void RemovesDiceWhenWhiteWins()
         {
             var rules = new Rules(new FakeDieRoller());
             var state = BackgammonState.DefaultState()
@@ -670,23 +567,12 @@ namespace SignalRGame.Backgammon
                     Bar: new PointState(0, 0)
                 );
 
-            var actions = new List<BackgammonAction>();
-            Task<bool> ExpectedDispatch(BackgammonAction arg)
-            {
-                actions.Add(arg);
-                return Task.FromResult(true);
-            }
-            await rules.CheckAutomaticActions(state, ExpectedDispatch);
+            var (invalid, hasAction) = rules.GetAutomaticActions(state);
+            Assert.True(hasAction);
 
-            Assert.Collection(
-                actions,
-                invalid =>
-                {
-                    var rolls = Assert.IsType<BackgammonCannotUseRoll>(invalid);
-                    Assert.Collection(rolls.DieValues,
-                        a => Assert.Equal(5, a)
-                    );
-                }
+            var rolls = Assert.IsType<BackgammonCannotUseRoll>(invalid);
+            Assert.Collection(rolls.DieValues,
+                a => Assert.Equal(5, a)
             );
         }
 
