@@ -10,7 +10,6 @@ namespace SignalRGame.Backgammon
     using static Enumerable;
     using static BackgammonState;
     using PointState = PlayerState<int>;
-    using ActionDispatcher = Func<BackgammonAction, Task<bool>>;
 
     public class Rules
     {
@@ -319,9 +318,9 @@ namespace SignalRGame.Backgammon
 
         private IReadOnlyList<int> RollDiceWithDoubles()
         {
-            return (dieRoller.RollDie(6), dieRoller.RollDie(6)) switch
+            return (dieRoller.RollDie(), dieRoller.RollDie()) switch
             {
-                (int a, int b) when a == b => Enumerable.Repeat(a, 4).ToArray(),
+                (int a, int b) when a == b => Repeat(a, 4).ToArray(),
                 (int a, int b) => new[] { a, b },
             };
         }

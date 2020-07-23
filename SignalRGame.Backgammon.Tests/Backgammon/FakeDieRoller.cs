@@ -12,7 +12,7 @@ namespace SignalRGame.Backgammon
             this.dieRolls = dieRolls;
         }
 
-        public int RollDie(int sides = 6)
+        public int RollDie()
         {
             return dieRolls[rollIndex++];
         }

@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 
 namespace SignalRGame.Checkers
 {
-    using ActionDispatcher = Func<CheckersAction, Task<bool>>;
-
     public class Rules
     {
         public static (CheckersState, bool) ApplyAction(CheckersState state, CheckersAction? action)
@@ -76,16 +74,6 @@ namespace SignalRGame.Checkers
                     }
                 case null:
                     return (state, false);
-            }
-        }
-
-        public static async Task CheckAutomaticActions(CheckersState state, ActionDispatcher dispatch)
-        {
-            switch (state)
-            {
-                case { Winner: null } when !CheckersExternalState.GetValidMoves(state).Any():
-                    await dispatch(new CheckersCannotMove());
-                    return;
             }
         }
 

@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace SignalRGame.GameUtilities
+namespace SignalRGame.Backgammon
 {
     public interface IDieRoller
     {
-        int RollDie(int sides = 6);
+        int RollDie();
     }
 
     public class DieRoller : IDieRoller
@@ -21,9 +21,9 @@ namespace SignalRGame.GameUtilities
             random = new Random(seed);
         }
 
-        public int RollDie(int sides = 6)
+        public int RollDie()
         {
-            return random.Next(1, sides + 1);
+            return random.Next(0, 6) + 1;
         }
     }
 }
