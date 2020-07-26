@@ -5,62 +5,71 @@ using System.Threading.Tasks;
 
 namespace SignalRGame.Checkers
 {
-    public readonly struct SingleChecker
+    public record SingleChecker
     {
-        public int Column { get; }
-        public int Row { get; }
-        public bool IsKing { get; }
+        public int Column { get; init; }
+        public int Row { get; init; }
+        public bool IsKing { get; init; }
 
-        public SingleChecker(int Column, int Row, bool IsKing = false)
+        public static SingleChecker Create(int Column, int Row, bool IsKing = false)
         {
             if ((Column + Row) % 2 == 0)
             {
                 throw new InvalidOperationException("Invalid checker placement");
             }
-            this.Column = Column;
-            this.Row = Row;
-            this.IsKing = IsKing;
+            return new SingleChecker
+            {
+                Column = Column,
+                Row = Row,
+                IsKing = IsKing,
+            };
         }
 
         public SingleChecker MoveTo(int Column, int Row)
         {
-            return new SingleChecker(Column, Row, Row == 7 || Row == 0 || IsKing);
+            return new SingleChecker { Column = Column, Row = Row, IsKing = Row == 7 || Row == 0 || IsKing };
         }
     }
 
-    public readonly struct CheckersState
+    public record CheckersState
     {
-        public Player CurrentPlayer { get; }
-        public int? MovingChecker { get; }
-        public Player? Winner { get; }
-        public PlayerState<bool> IsReady { get; }
-        public PlayerState<IReadOnlyList<SingleChecker?>> Checkers { get; }
+        public static readonly PlayerState<IReadOnlyList<SingleChecker?>> InitialCheckers = new PlayerState<IReadOnlyList<SingleChecker?>>(
+            white: new SingleChecker?[]
+            {
+                SingleChecker.Create(1, 0),
+                SingleChecker.Create(3, 0),
+                SingleChecker.Create(5, 0),
+                SingleChecker.Create(7, 0),
+                SingleChecker.Create(0, 1),
+                SingleChecker.Create(2, 1),
+                SingleChecker.Create(4, 1),
+                SingleChecker.Create(6, 1),
+                SingleChecker.Create(1, 2),
+                SingleChecker.Create(3, 2),
+                SingleChecker.Create(5, 2),
+                SingleChecker.Create(7, 2),
+            },
+            black: new SingleChecker?[]
+            {
+                SingleChecker.Create(0, 7),
+                SingleChecker.Create(2, 7),
+                SingleChecker.Create(4, 7),
+                SingleChecker.Create(6, 7),
+                SingleChecker.Create(1, 6),
+                SingleChecker.Create(3, 6),
+                SingleChecker.Create(5, 6),
+                SingleChecker.Create(7, 6),
+                SingleChecker.Create(0, 5),
+                SingleChecker.Create(2, 5),
+                SingleChecker.Create(4, 5),
+                SingleChecker.Create(6, 5),
+            }
+        );
 
-        public CheckersState(Player CurrentPlayer, int? MovingChecker, Player? Winner, PlayerState<bool> IsReady, PlayerState<IReadOnlyList<SingleChecker?>> Checkers)
-        {
-            this.CurrentPlayer = CurrentPlayer;
-            this.MovingChecker = MovingChecker;
-            this.Winner = Winner;
-            this.IsReady = IsReady;
-            this.Checkers = Checkers;
-        }
-
-        public CheckersState With(
-            Player? CurrentPlayer = null,
-            int? MovingChecker = -1,
-            Player? Winner = null,
-            PlayerState<bool>? IsReady = null,
-            PlayerState<IReadOnlyList<SingleChecker?>>? Checkers = null
-        )
-        {
-            return new CheckersState(
-                CurrentPlayer: CurrentPlayer ?? this.CurrentPlayer,
-                MovingChecker: MovingChecker == -1 ? this.MovingChecker
-                    : MovingChecker,
-                Winner: Winner ?? this.Winner,
-                IsReady: IsReady ?? this.IsReady,
-                Checkers: Checkers ?? this.Checkers
-            );
-        }
+        public Player CurrentPlayer { get; init; } = Player.White;
+        public int? MovingChecker { get; init; } = null;
+        public Player? Winner { get; init; } = null;
+        public PlayerState<bool> IsReady { get; init; } = new PlayerState<bool>(false, false);
+        public PlayerState<IReadOnlyList<SingleChecker?>> Checkers { get; init; } = InitialCheckers;
     }
 }

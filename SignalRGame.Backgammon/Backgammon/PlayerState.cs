@@ -2,10 +2,14 @@
 
 namespace SignalRGame.Backgammon
 {
-    public readonly struct PlayerState<T>
+    public record PlayerState<T>
     {
-        public readonly T White;
-        public readonly T Black;
+        public T White { get; init; } = default!;
+        public T Black { get; init; } = default!;
+
+        public PlayerState()
+        {
+        }
 
         public PlayerState(T white, T black)
         {
@@ -30,5 +34,4 @@ namespace SignalRGame.Backgammon
                 black: player == Player.Black ? value : Black
             );
     }
-
 }

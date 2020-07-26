@@ -1,0 +1,104 @@
+
+.checker {
+    stroke: rgba(0,0,0, 0.87);
+    filter: none;
+}
+
+.checker .glow {
+    stroke: rgb(255,186,0);
+    stroke-width: 1px;
+    filter: var(--selectionGlow);
+    display: none;
+}
+
+.selectable-container:hover .checker.selectable .glow {
+    display: initial;
+}
+.checker.selected .glow {
+    display: initial;
+}
+.checker :not(.hitbox) {
+    filter: var(--dropshadow);
+}
+
+.checker.transparent {
+    fill: transparent;
+    stroke: transparent;
+}
+
+.checker.white {
+    fill: wheat;
+}
+
+.checker.black {
+    fill: #251203;
+}
+
+.felt rect:first-child {
+    fill: #004000;
+}
+
+.felt rect:nth-child(2) {
+    filter: var(--noise);
+    opacity: 0.1;
+}
+
+.walls {
+    fill: #48260d;
+    filter: var(--dropshadow);
+}
+
+.point.white {
+    fill: #997950
+}
+.point.black {
+    fill: #351e10;
+}
+.point.transparent {
+    fill: transparent;
+}
+.point.selectable:hover :not(.hitbox), .point.selected :not(.hitbox) {
+    stroke: rgb(255,186,0);
+    stroke-width: 1px;
+    filter: var(--selectionGlow);
+}
+
+
+.die {
+    stroke: rgba(0,0,0, 0.87);
+}
+
+.die.selectable:hover :first-child {
+    filter: var(--selectionGlow);
+}
+
+.die rect {
+    filter: var(--dropshadow);
+}
+
+.die.white {
+    fill: wheat;
+}
+
+.die.white .pip {
+    fill: #251203;
+}
+
+.die.black {
+    fill: #251203;
+}
+
+.die.black .pip {
+    fill: wheat;
+}
+
+
+.home {
+    fill: transparent;
+    filter: none;
+}
+.home.selectable:hover *, .home.selected * {
+    stroke: rgb(255,186,0);
+    stroke-width: 1px;
+    filter: var(--selectionGlow);
+}

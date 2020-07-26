@@ -20,12 +20,12 @@ namespace SignalRGame.Backgammon
         public void CatchWhenNoMovesCanBeMadeByBlack()
         {
             var rules = new Rules(new FakeDieRoller());
-            var state = BackgammonState.DefaultState()
-                .With(
-                    null,
-                    CurrentPlayer: Player.Black,
-                    DiceRolls: new DiceState(Player.Black, new[] { 4, 5 }, Array.Empty<int>()),
-                    Points: new[]
+            var state = new BackgammonState()
+            {
+                Undo = null,
+                CurrentPlayer = Player.Black,
+                DiceRolls = new DiceState(Player.Black, new[] { 4, 5 }, Array.Empty<int>()),
+                Points = new[]
                     {
                         Black(2),
                         NoCheckers(),
@@ -52,8 +52,8 @@ namespace SignalRGame.Backgammon
                         NoCheckers(),
                         NoCheckers(),
                     },
-                    Bar: new PointState(0, 0)
-                );
+                Bar = new PointState(0, 0)
+            };
 
             var (invalid, hasAction) = rules.GetAutomaticActions(state);
             Assert.True(hasAction);
@@ -69,12 +69,12 @@ namespace SignalRGame.Backgammon
         public void CatchWhenCannotMoveOffBarByBlack()
         {
             var rules = new Rules(new FakeDieRoller());
-            var state = BackgammonState.DefaultState()
-                .With(
-                    null,
-                    CurrentPlayer: Player.Black,
-                    DiceRolls: new DiceState(Player.Black, new[] { 6 }, Array.Empty<int>()),
-                    Points: new[]
+            var state = new BackgammonState()
+            {
+                Undo = null,
+                CurrentPlayer = Player.Black,
+                    DiceRolls = new DiceState(Player.Black, new[] { 6 }, Array.Empty<int>()),
+                    Points = new[]
                     {
                         Black(2),
                         NoCheckers(),
@@ -101,8 +101,8 @@ namespace SignalRGame.Backgammon
                         NoCheckers(),
                         NoCheckers(),
                     },
-                    Bar: new PointState(white: 0, black: 1)
-                );
+                    Bar = new PointState(white: 0, black: 1)
+                };
 
             var (invalid, hasAction) = rules.GetAutomaticActions(state);
             Assert.True(hasAction);
@@ -117,12 +117,12 @@ namespace SignalRGame.Backgammon
         public void AllowValidMovesByBlack()
         {
             var rules = new Rules(new FakeDieRoller());
-            var state = BackgammonState.DefaultState()
-                .With(
-                    null,
-                    CurrentPlayer: Player.Black,
-                    DiceRolls: new DiceState(Player.Black, new[] { 4, 5 }, Array.Empty<int>()),
-                    Points: new[]
+            var state = new BackgammonState()
+            {
+                Undo = null,
+                CurrentPlayer = Player.Black,
+                DiceRolls = new DiceState(Player.Black, new[] { 4, 5 }, Array.Empty<int>()),
+                Points = new[]
                     {
                         NoCheckers(),
                         NoCheckers(),
@@ -149,8 +149,8 @@ namespace SignalRGame.Backgammon
                         NoCheckers(),
                         Black(2),
                     },
-                    Bar: new PointState(0, 0)
-                );
+                Bar = new PointState(0, 0)
+            };
 
             var (_, hasAction) = rules.GetAutomaticActions(state);
             Assert.False(hasAction);
@@ -160,12 +160,12 @@ namespace SignalRGame.Backgammon
         public void AllowValidMovesByBlackInOrder()
         {
             var rules = new Rules(new FakeDieRoller());
-            var state = BackgammonState.DefaultState()
-                .With(
-                    null,
-                    CurrentPlayer: Player.Black,
-                    DiceRolls: new DiceState(Player.Black, new[] { 4, 5 }, Array.Empty<int>()),
-                    Points: new[]
+            var state = new BackgammonState()
+            {
+                Undo = null,
+                CurrentPlayer = Player.Black,
+                DiceRolls = new DiceState(Player.Black, new[] { 4, 5 }, Array.Empty<int>()),
+                Points = new[]
                     {
                         Black(1),
                         NoCheckers(),
@@ -192,8 +192,8 @@ namespace SignalRGame.Backgammon
                         NoCheckers(),
                         NoCheckers(),
                     },
-                    Bar: new PointState(0, 0)
-                );
+                Bar = new PointState(0, 0)
+            };
 
             var (_, hasAction) = rules.GetAutomaticActions(state);
             Assert.False(hasAction);
@@ -203,12 +203,12 @@ namespace SignalRGame.Backgammon
         public void CatchWhenOnlyOneMoveCanBeMadeByBlack()
         {
             var rules = new Rules(new FakeDieRoller());
-            var state = BackgammonState.DefaultState()
-                .With(
-                    null,
-                    CurrentPlayer: Player.Black,
-                    DiceRolls: new DiceState(Player.Black, new[] { 4, 5 }, Array.Empty<int>()),
-                    Points: new[]
+            var state = new BackgammonState()
+            {
+                Undo = null,
+                CurrentPlayer = Player.Black,
+                DiceRolls = new DiceState(Player.Black, new[] { 4, 5 }, Array.Empty<int>()),
+                Points = new[]
                     {
                         Black(1),
                         NoCheckers(),
@@ -235,8 +235,8 @@ namespace SignalRGame.Backgammon
                         NoCheckers(),
                         NoCheckers(),
                     },
-                    Bar: new PointState(0, 0)
-                );
+                Bar = new PointState(0, 0)
+            };
 
             var (invalid, hasAction) = rules.GetAutomaticActions(state);
             Assert.True(hasAction);
@@ -251,12 +251,12 @@ namespace SignalRGame.Backgammon
         public void RemovesDiceWhenBlackWins()
         {
             var rules = new Rules(new FakeDieRoller());
-            var state = BackgammonState.DefaultState()
-                .With(
-                    null,
-                    CurrentPlayer: Player.Black,
-                    DiceRolls: new DiceState(Player.Black, new[] { 5 }, Array.Empty<int>()),
-                    Points: new[]
+            var state = new BackgammonState()
+            {
+                Undo = null,
+                CurrentPlayer = Player.Black,
+                DiceRolls = new DiceState(Player.Black, new[] { 5 }, Array.Empty<int>()),
+                Points = new[]
                     {
                         NoCheckers(),
                         NoCheckers(),
@@ -283,8 +283,8 @@ namespace SignalRGame.Backgammon
                         NoCheckers(),
                         NoCheckers(),
                     },
-                    Bar: new PointState(0, 0)
-                );
+                Bar = new PointState(0, 0)
+            };
 
             var (invalid, hasAction) = rules.GetAutomaticActions(state);
             Assert.True(hasAction);
@@ -299,12 +299,12 @@ namespace SignalRGame.Backgammon
         public void CatchWhenNoMovesCanBeMadeByWhite()
         {
             var rules = new Rules(new FakeDieRoller());
-            var state = BackgammonState.DefaultState()
-                .With(
-                    null,
-                    CurrentPlayer: Player.White,
-                    DiceRolls: new DiceState(Player.White, new[] { 4, 5 }, Array.Empty<int>()),
-                    Points: new[]
+            var state = new BackgammonState()
+            {
+                Undo = null,
+                CurrentPlayer = Player.White,
+                DiceRolls = new DiceState(Player.White, new[] { 4, 5 }, Array.Empty<int>()),
+                Points = new[]
                     {
                         NoCheckers(),
                         NoCheckers(),
@@ -331,8 +331,8 @@ namespace SignalRGame.Backgammon
                         NoCheckers(),
                         White(2),
                     },
-                    Bar: new PointState(0, 0)
-                );
+                Bar = new PointState(0, 0)
+            };
 
 
             var (invalid, hasAction) = rules.GetAutomaticActions(state);
@@ -349,12 +349,12 @@ namespace SignalRGame.Backgammon
         public void CatchWhenCannotMoveOffBarByWhite()
         {
             var rules = new Rules(new FakeDieRoller());
-            var state = BackgammonState.DefaultState()
-                .With(
-                    null,
-                    CurrentPlayer: Player.White,
-                    DiceRolls: new DiceState(Player.White, new[] { 6 }, Array.Empty<int>()),
-                    Points: new[]
+            var state = new BackgammonState()
+            {
+                Undo = null,
+                CurrentPlayer = Player.White,
+                DiceRolls = new DiceState(Player.White, new[] { 6 }, Array.Empty<int>()),
+                Points = new[]
                     {
                         NoCheckers(),
                         NoCheckers(),
@@ -381,8 +381,8 @@ namespace SignalRGame.Backgammon
                         NoCheckers(),
                         White(2),
                     },
-                    Bar: new PointState(white: 1, black: 0)
-                );
+                Bar = new PointState(white: 1, black: 0)
+            };
 
 
             var (invalid, hasAction) = rules.GetAutomaticActions(state);
@@ -398,12 +398,12 @@ namespace SignalRGame.Backgammon
         public void AllowValidMovesByWhite()
         {
             var rules = new Rules(new FakeDieRoller());
-            var state = BackgammonState.DefaultState()
-                .With(
-                    null,
-                    CurrentPlayer: Player.White,
-                    DiceRolls: new DiceState(Player.White, new[] { 4, 5 }, Array.Empty<int>()),
-                    Points: new[]
+            var state = new BackgammonState()
+            {
+                Undo = null,
+                CurrentPlayer = Player.White,
+                DiceRolls = new DiceState(Player.White, new[] { 4, 5 }, Array.Empty<int>()),
+                Points = new[]
                     {
                         White(2),
                         NoCheckers(),
@@ -430,8 +430,8 @@ namespace SignalRGame.Backgammon
                         NoCheckers(),
                         NoCheckers(),
                     },
-                    Bar: new PointState(0, 0)
-                );
+                Bar = new PointState(0, 0)
+            };
 
             var (_, hasAction) = rules.GetAutomaticActions(state);
             Assert.False(hasAction);
@@ -441,12 +441,12 @@ namespace SignalRGame.Backgammon
         public void AllowValidMovesByWhiteInOrder()
         {
             var rules = new Rules(new FakeDieRoller());
-            var state = BackgammonState.DefaultState()
-                .With(
-                    null,
-                    CurrentPlayer: Player.White,
-                    DiceRolls: new DiceState(Player.White, new[] { 4, 5 }, Array.Empty<int>()),
-                    Points: new[]
+            var state = new BackgammonState()
+            {
+                Undo = null,
+                CurrentPlayer = Player.White,
+                DiceRolls = new DiceState(Player.White, new[] { 4, 5 }, Array.Empty<int>()),
+                Points = new[]
                     {
                         NoCheckers(),
                         NoCheckers(),
@@ -473,8 +473,8 @@ namespace SignalRGame.Backgammon
                         NoCheckers(),
                         White(1),
                     },
-                    Bar: new PointState(0, 0)
-                );
+                Bar = new PointState(0, 0)
+            };
 
             var (_, hasAction) = rules.GetAutomaticActions(state);
             Assert.False(hasAction);
@@ -484,12 +484,12 @@ namespace SignalRGame.Backgammon
         public void CatchWhenOnlyOneMoveCanBeMadeByWhite()
         {
             var rules = new Rules(new FakeDieRoller());
-            var state = BackgammonState.DefaultState()
-                .With(
-                    null,
-                    CurrentPlayer: Player.White,
-                    DiceRolls: new DiceState(Player.White, new[] { 4, 5 }, Array.Empty<int>()),
-                    Points: new[]
+            var state = new BackgammonState()
+            {
+                Undo = null,
+                CurrentPlayer = Player.White,
+                DiceRolls = new DiceState(Player.White, new[] { 4, 5 }, Array.Empty<int>()),
+                Points = new[]
                     {
                         NoCheckers(),
                         NoCheckers(),
@@ -516,8 +516,8 @@ namespace SignalRGame.Backgammon
                         NoCheckers(),
                         White(1),
                     },
-                    Bar: new PointState(0, 0)
-                );
+                Bar = new PointState(0, 0)
+            };
 
             var (invalid, hasAction) = rules.GetAutomaticActions(state);
             Assert.True(hasAction);
@@ -532,12 +532,12 @@ namespace SignalRGame.Backgammon
         public void RemovesDiceWhenWhiteWins()
         {
             var rules = new Rules(new FakeDieRoller());
-            var state = BackgammonState.DefaultState()
-                .With(
-                    null,
-                    CurrentPlayer: Player.White,
-                    DiceRolls: new DiceState(Player.White, new[] { 5 }, Array.Empty<int>()),
-                    Points: new[]
+            var state = new BackgammonState()
+            {
+                Undo = null,
+                CurrentPlayer = Player.White,
+                DiceRolls = new DiceState(Player.White, new[] { 5 }, Array.Empty<int>()),
+                Points = new[]
                     {
                         NoCheckers(),
                         NoCheckers(),
@@ -564,8 +564,8 @@ namespace SignalRGame.Backgammon
                         NoCheckers(),
                         NoCheckers(),
                     },
-                    Bar: new PointState(0, 0)
-                );
+                Bar = new PointState(0, 0)
+            };
 
             var (invalid, hasAction) = rules.GetAutomaticActions(state);
             Assert.True(hasAction);

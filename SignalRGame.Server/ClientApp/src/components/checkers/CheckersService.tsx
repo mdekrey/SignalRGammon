@@ -18,7 +18,8 @@ export type ValidMove = {
 };
 
 export type ObservedState = {
-    state: { state: CheckersState; validMovesForCurrentPlayer: ValidMove[]; };
+    state: CheckersState;
+    validMovesForCurrentPlayer: ValidMove[];
     action: CheckersAction;
 };
 

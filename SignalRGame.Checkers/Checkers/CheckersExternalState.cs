@@ -5,22 +5,24 @@ using System.Threading.Tasks;
 
 namespace SignalRGame.Checkers
 {
-    public struct Move
+    public record Move
     {
-        public int CheckerIndex;
-        public bool IsJump;
-        public int Column;
-        public int Row;
+        public int CheckerIndex { get; init; }
+        public bool IsJump { get; init; }
+        public int Column { get; init; }
+        public int Row { get; init; }
     }
 
-    public readonly struct CheckersExternalState
+    public record CheckersExternalState
     {
-        public CheckersState State { get; }
-        public IReadOnlyList<Move> ValidMovesForCurrentPlayer { get; }
+        public CheckersState State { get; init; }
+        public CheckersAction? Action { get; }
+        public IReadOnlyList<Move> ValidMovesForCurrentPlayer { get; init; }
 
-        public CheckersExternalState(CheckersState state)
+        public CheckersExternalState(CheckersState state, CheckersAction? action)
         {
             this.State = state;
+            this.Action = action;
             this.ValidMovesForCurrentPlayer = GetValidMoves(state);
         }
 
@@ -32,7 +34,7 @@ namespace SignalRGame.Checkers
             var moves = (from tuple in state.Checkers[player].Select((checker, index) => (checker, index))
                          where tuple.checker != null
                          where state.MovingChecker == null || tuple.index == state.MovingChecker
-                         from move in GetValidMoves(tuple.checker!.Value, player, tuple.index, state.Checkers)
+                         from move in GetValidMoves(tuple.checker, player, tuple.index, state.Checkers)
                          select move).ToArray();
 
             if (state.MovingChecker != null || moves.Any(m => m.IsJump))
@@ -56,8 +58,8 @@ namespace SignalRGame.Checkers
                                 new Move { IsJump = true, CheckerIndex = currentCheckerIndex, Column = column + columnOffset, Row = row + rowOffset },
                        _ => (Move?)null
                    }
-                   where move.HasValue
-                   select move.Value;
+                   where move != null
+                   select move;
 
         }
 
@@ -85,7 +87,7 @@ namespace SignalRGame.Checkers
         private static IEnumerable<SingleChecker> NonNullCheckers(IEnumerable<SingleChecker?> checkers) =>
             checkers
                 .Where(c => c != null)
-                .Select(c => c!.Value);
+                .Select(c => c!);
 
         private static IEnumerable<T> Of<T>(T value)
         {

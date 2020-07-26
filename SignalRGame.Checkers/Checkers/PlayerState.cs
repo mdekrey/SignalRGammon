@@ -5,10 +5,14 @@ using System.Threading.Tasks;
 
 namespace SignalRGame.Checkers
 {
-    public readonly struct PlayerState<T>
+    public record PlayerState<T>
     {
-        public readonly T White;
-        public readonly T Black;
+        public T White { get; init; } = default!;
+        public T Black { get; init; } = default!;
+
+        public PlayerState()
+        {
+        }
 
         public PlayerState(T white, T black)
         {

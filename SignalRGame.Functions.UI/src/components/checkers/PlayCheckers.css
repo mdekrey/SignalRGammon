@@ -1,0 +1,30 @@
+.PlayCheckers {
+    position: relative;
+    height: calc(100vh - 20px);
+    width: calc(100vw - 20px);
+}
+
+.PlayCheckers svg {
+    height: calc(100vh - 20px);
+    width: calc(100vw - 20px);
+}
+
+.PlayCheckers .overlay {
+    position: absolute;
+    top: 0;
+    height: calc(100vh - 20px);
+    width: calc(100vw - 20px);
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-rows: 1fr auto 1fr;
+    display: grid;
+    grid-template-areas: ". . ." ". child ." ". . .";
+}
+
+.PlayCheckers .overlay .child {
+    grid-area: child;
+    text-align: center;
+}
+
+.PlayCheckers .ready-button-container button {
+    font-size: 2rem;
+}

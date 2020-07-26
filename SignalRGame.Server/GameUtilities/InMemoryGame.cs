@@ -21,7 +21,7 @@ namespace SignalRGame.GameUtilities
             this.gameLogic = gameLogic;
             _state = new BehaviorSubject<(TInternalState state, TAction action)>((gameLogic.InitialState(), default(TAction)!));
             states = _state.Replay(1).RefCount();
-            States = states.Select(tuple => (GetExternalState(tuple.state), tuple.action));
+            States = states.Select(tuple => GetExternalState(tuple.state, tuple.action));
 
             states.Select(s => s.state).Select(s => Observable.FromAsync(() => CheckAutomaticActions(s))).Concat().Subscribe();
         }
@@ -38,7 +38,7 @@ namespace SignalRGame.GameUtilities
                 NamingStrategy = new CamelCaseNamingStrategy(),
             },
         };
-        public IObservable<(TExternalState state, TAction action)> States { get; }
+        public IObservable<TExternalState> States { get; }
 
         public TimeSpan SlidingExpiration => TimeSpan.FromHours(1);
 
@@ -66,9 +66,9 @@ namespace SignalRGame.GameUtilities
                 : Task.CompletedTask;
         }
 
-        private TExternalState GetExternalState(TInternalState state)
+        private TExternalState GetExternalState(TInternalState state, TAction action)
         {
-            return gameLogic.ToPublicGameState(state, null);
+            return gameLogic.ToPublicGameState(state, action, null);
         }
     }
 

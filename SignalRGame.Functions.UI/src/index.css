@@ -1,0 +1,33 @@
+html, body, #root {
+  height: 100vh;
+  color: white;
+  background: #001628;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.lookless {
+  border: none;
+  background-color: transparent;
+  color: inherit;
+}
+
+button.lookless {
+  cursor: pointer;
+}
+
+a, a:visited {
+  color: #72e0d1;
+}

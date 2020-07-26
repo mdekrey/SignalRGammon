@@ -21,11 +21,11 @@ namespace SignalRGame.GameUtilities
 
         IObservable<string> IGame.JsonStates =>
             States
-                .Select(s => JsonConvert.SerializeObject(new { s.state, s.action }, JsonSettings));
+                .Select(s => JsonConvert.SerializeObject(s, JsonSettings));
 
         Task<bool> IGame.Do(string messageJson) => Do(JsonConvert.DeserializeObject<TAction>(messageJson, JsonSettings));
 
-        IObservable<(TState state, TAction action)> States { get; }
+        IObservable<TState> States { get; }
 
         Task<bool> Do(TAction action);
     }

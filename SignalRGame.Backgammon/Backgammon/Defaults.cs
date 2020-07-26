@@ -9,8 +9,8 @@ namespace SignalRGame.Backgammon
 
     public static class Defaults
     {
-        public static DiceState EmptyDiceRolls = new DiceState(Array.Empty<int>(), Array.Empty<int>());
-        public static PointState EmptyPoint = new PointState(0, 0);
+        public static readonly DiceState EmptyDiceRolls = new DiceState(Array.Empty<int>(), Array.Empty<int>());
+        public static readonly PointState EmptyPoint = new PointState(0, 0);
 
         public static IReadOnlyList<PointState> StartingPosition = new[]
         {

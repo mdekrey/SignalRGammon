@@ -28,11 +28,9 @@ export function PlayCheckersComponent() {
         );
     }
 
-    const isReady = gameState.state.state.isReady.white && gameState.state.state.isReady.black;
-    const isWaiting = isReady ? (!gameState.state.state.winner && gameState.state.state.currentPlayer !== playerColor) : gameState.state.state.isReady[playerColor];
-    const winner = gameState.state.state.winner;
-
-    console.log(gameState.state.validMovesForCurrentPlayer);
+    const isReady = gameState.state.isReady.white && gameState.state.isReady.black;
+    const isWaiting = isReady ? (!gameState.state.winner && gameState.state.currentPlayer !== playerColor) : gameState.state.isReady[playerColor];
+    const winner = gameState.state.winner;
 
     return (
         <div className="PlayCheckers">
@@ -43,9 +41,9 @@ export function PlayCheckersComponent() {
                 <g transform={playerColor === 'white' ? boardPositions.whiteRotation : boardPositions.blackRotation}>
                     <Board />
                     <CheckersBoardCheckers
-                        checkers={gameState.state.state.checkers}
-                        currentPlayer={gameState.state.state.currentPlayer}
-                        validMovesForCurrentPlayer={gameState.state.validMovesForCurrentPlayer} />
+                        checkers={gameState.state.checkers}
+                        currentPlayer={gameState.state.currentPlayer}
+                        validMovesForCurrentPlayer={gameState.validMovesForCurrentPlayer} />
                 </g>
             </svg>
             {isWaiting || winner || !isReady
@@ -53,7 +51,7 @@ export function PlayCheckersComponent() {
                     <div className="child">
                         {(!isReady)
                             && <div className="share-link">Share this with the other player: <input type="text" value={otherPlayerUrl} onClick={copyUrl} readOnly /></div>}
-                        {!gameState.state.state.isReady[playerColor]
+                        {!gameState.state.isReady[playerColor]
                             && <div className="ready-button-container"><button className="ready-button" onClick={ready} disabled={!gameState}>Ready!</button></div>}
                         {isWaiting && <div className="waiting-container"><h1>Waiting on the other player...</h1></div>}
                         {winner && <div className="winner-container">

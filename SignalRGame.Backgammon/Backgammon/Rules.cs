@@ -102,20 +102,20 @@ namespace SignalRGame.Backgammon
                         return (state, false);
                     return (state.DiceRolls.White[0], state.DiceRolls.Black[0]) switch
                     {
-                        (int white, int black) when white == black => (DefaultState(), true),
+                        (int white, int black) when white == black => (new BackgammonState(), true),
                         (int white, int black) => (
-                            state.With(
-                                null, 
-                                CurrentPlayer: white < black ? Player.Black : Player.White,
-                                DiceRolls: Defaults.EmptyDiceRolls.With(white < black ? Player.Black : Player.White, new[] { black, white })
-                            ),
+                            state with {
+                                Undo = null,
+                                CurrentPlayer = white < black ? Player.Black : Player.White,
+                                DiceRolls = Defaults.EmptyDiceRolls.With(white < black ? Player.Black : Player.White, new[] { black, white })
+                            },
                             true
                         )
                     };
                 case { Winner: null, CurrentPlayer: null }:
                     return action switch
                     {
-                        BackgammonDiceRoll { Player: var player } when state.DiceRolls[player].Count == 0 => (state.With(null, DiceRolls: state.DiceRolls.With(player, new[] { dieRoller.RollDie() })), true),
+                        BackgammonDiceRoll { Player: var player } when state.DiceRolls[player].Count == 0 => (state with { Undo = null, DiceRolls = state.DiceRolls.With(player, new[] { dieRoller.RollDie() }) }, true),
                         _ => (state, false)
                     };
                 case { Winner: null, CurrentPlayer: Player currentPlayer }:
@@ -123,7 +123,7 @@ namespace SignalRGame.Backgammon
                     {
                         BackgammonDiceRoll { Player: var actingPlayer } 
                             when actingPlayer == currentPlayer && state.DiceRolls[currentPlayer].Count == 0 => 
-                                (state.With(null, DiceRolls: Defaults.EmptyDiceRolls.With(currentPlayer, RollDiceWithDoubles())), true),
+                                (state with { Undo = null, DiceRolls = Defaults.EmptyDiceRolls.With(currentPlayer, RollDiceWithDoubles()) }, true),
                         BackgammonMove { Player: var actingPlayer, DieValue: var dieValue, StartingPointNumber: var startingPoint } 
                             when actingPlayer == currentPlayer && state.DiceRolls[currentPlayer].Contains(dieValue) =>
                                 HandleMove(state, dieValue, startingPoint),
@@ -141,7 +141,7 @@ namespace SignalRGame.Backgammon
                 case { Winner: Player _ }:
                     return action switch
                     {
-                        BackgammonNewGame _ => (DefaultState(), true),
+                        BackgammonNewGame _ => (new BackgammonState(), true),
                         _ => (state, false)
                     };
             }
@@ -198,13 +198,14 @@ namespace SignalRGame.Backgammon
             var resultDice = state.DiceRolls[player].ToList();
             resultDice.RemoveAt(resultDice.IndexOf(dieValue));
             return (
-                state.With(
-                    resultDice.Count == 0 ? null : state,
-                    CurrentPlayer: resultDice.Count == 0 ? player.OtherPlayer() : player,
-                    DiceRolls: state.DiceRolls.With(player, resultDice.AsReadOnly()),
-                    Points: points,
-                    Bar: bar
-                ),
+                state with
+                {
+                    Undo = resultDice.Count == 0 ? null : state,
+                    CurrentPlayer = resultDice.Count == 0 ? player.OtherPlayer() : player,
+                    DiceRolls = state.DiceRolls.With(player, resultDice.AsReadOnly()),
+                    Points = points,
+                    Bar = bar
+                },
                 true
             );
         }
@@ -240,12 +241,13 @@ namespace SignalRGame.Backgammon
             var resultDice = state.DiceRolls[player].ToList();
             resultDice.RemoveAt(resultDice.IndexOf(dieValue));
             return (
-                state.With(
-                    resultDice.Count == 0 ? null : state,
-                    CurrentPlayer: resultDice.Count == 0 ? player.OtherPlayer() : player,
-                    DiceRolls: state.DiceRolls.With(player, resultDice.AsReadOnly()),
-                    Points: points
-                ),
+                state with
+                {
+                    Undo = resultDice.Count == 0 ? null : state,
+                    CurrentPlayer = resultDice.Count == 0 ? player.OtherPlayer() : player,
+                    DiceRolls = state.DiceRolls.With(player, resultDice.AsReadOnly()),
+                    Points = points
+                },
                 true
             );
         }
@@ -263,11 +265,11 @@ namespace SignalRGame.Backgammon
                 resultDice.RemoveAt(resultDice.IndexOf(dieValue));
             }
             return (
-                state.With(
-                    state.Undo,
-                    CurrentPlayer: resultDice.Count == 0 ? player.OtherPlayer() : player,
-                    DiceRolls: state.DiceRolls.With(player, resultDice.AsReadOnly())
-                ),
+                state with
+                {
+                    CurrentPlayer = resultDice.Count == 0 ? player.OtherPlayer() : player,
+                    DiceRolls = state.DiceRolls.With(player, resultDice.AsReadOnly())
+                },
                 true
             );
         }
@@ -279,10 +281,11 @@ namespace SignalRGame.Backgammon
                 return (state, false);
 
             return (
-                state.With(
-                    null,
-                    Winner: player
-                ),
+                state with
+                {
+                    Undo = null,
+                    Winner = player
+                },
                 true
             );
         }

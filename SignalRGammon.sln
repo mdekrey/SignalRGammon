@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalRGame.Backgammon", "S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalRGame.Backgammon.Tests", "SignalRGame.Backgammon.Tests\SignalRGame.Backgammon.Tests.csproj", "{C55504E6-27C7-4C98-A18D-713CEE4767D9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalRGame.Functions", "SignalRGame.Functions\SignalRGame.Functions.csproj", "{C4EE145F-C83C-49DD-B3D9-BC4C5FD7DFD6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{C55504E6-27C7-4C98-A18D-713CEE4767D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C55504E6-27C7-4C98-A18D-713CEE4767D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C55504E6-27C7-4C98-A18D-713CEE4767D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4EE145F-C83C-49DD-B3D9-BC4C5FD7DFD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4EE145F-C83C-49DD-B3D9-BC4C5FD7DFD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4EE145F-C83C-49DD-B3D9-BC4C5FD7DFD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4EE145F-C83C-49DD-B3D9-BC4C5FD7DFD6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
