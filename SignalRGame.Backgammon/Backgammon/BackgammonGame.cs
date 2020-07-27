@@ -46,7 +46,6 @@ namespace SignalRGame.Backgammon
 
         public string FromState(BackgammonState state) => JsonSerializer.Serialize(state, options);
         public BackgammonState ToState(string state) => JsonSerializer.Deserialize<BackgammonState>(state, options)!;
-        public string FromAction(BackgammonAction? action) => Newtonsoft.Json.JsonConvert.SerializeObject(action, newtonsoftSettings);
         public BackgammonAction? ToAction(string action) => Newtonsoft.Json.JsonConvert.DeserializeObject<BackgammonAction?>(action, newtonsoftSettings);
         public string FromPublicState(BackgammonPublicState state) => Newtonsoft.Json.JsonConvert.SerializeObject(state, newtonsoftSettings);
     }

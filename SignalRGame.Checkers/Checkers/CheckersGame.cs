@@ -35,7 +35,6 @@ namespace SignalRGame.Checkers
 
         public string FromState(CheckersState state) => JsonSerializer.Serialize(state, options);
         public CheckersState ToState(string state) => JsonSerializer.Deserialize<CheckersState>(state, options);
-        public string FromAction(CheckersAction? action) => Newtonsoft.Json.JsonConvert.SerializeObject(action, newtonsoftSettings);
         public CheckersAction? ToAction(string action) => Newtonsoft.Json.JsonConvert.DeserializeObject<CheckersAction?>(action, newtonsoftSettings);
         public string FromPublicState(CheckersExternalState state) => Newtonsoft.Json.JsonConvert.SerializeObject(state, newtonsoftSettings);
     }

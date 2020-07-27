@@ -47,7 +47,7 @@ namespace SignalRGame
         }
 
         [FunctionName("Cleanup")]
-        public static async Task Cleanup([TimerTrigger("0 */5 * * * *")] TimerInfo myTimer, ILogger log,
+        public static async Task Cleanup([TimerTrigger("0 0 */4 * * *")] TimerInfo myTimer, ILogger log,
             [Blob(BlobStorageContainerName, FileAccess.Read)] CloudBlobContainer blobContainer)
         {
             BlobContinuationToken? continuationToken = null;

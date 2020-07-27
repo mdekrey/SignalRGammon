@@ -13,14 +13,12 @@ namespace SignalRGame.GameUtilities
 
         string FromState(TPersistedState state);
         new TPersistedState ToState(string state);
-        string FromAction(TAction action);
         new TAction ToAction(string action);
         string FromPublicState(TPublicState action);
 
 
         string IGameLogic.FromState(GameState state) => FromState((TPersistedState)state.State!);
         GameState IGameLogic.ToState(string state) => new GameState(ToState(state));
-        string IGameLogic.FromAction(GameAction action) => FromAction((TAction)action.Action!);
         GameAction IGameLogic.ToAction(string action) => new GameAction(ToAction(action));
         GameState IGameLogic.InitialState() => new GameState(InitialState());
         (GameState newState, bool isValid) IGameLogic.PerformAction(GameState state, GameAction action, ClaimsPrincipal? user) => 
@@ -39,15 +37,14 @@ namespace SignalRGame.GameUtilities
 
     public interface IGameLogic
     {
-        string FromState(GameState state);
-        GameState ToState(string state);
-        string FromAction(GameAction action);
-        GameAction ToAction(string action);
-
-
         GameState InitialState();
         (GameState newState, bool isValid) PerformAction(GameState state, GameAction action, ClaimsPrincipal? user);
         (GameAction action, bool hasAction) GetRecommendedAction(GameState state, ClaimsPrincipal? user);
         string ToPublicGameState(GameState state, GameAction? action, ClaimsPrincipal? user);
+
+
+        string FromState(GameState state);
+        GameState ToState(string state);
+        GameAction ToAction(string action);
     }
 }
