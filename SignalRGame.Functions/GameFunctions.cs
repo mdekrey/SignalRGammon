@@ -46,6 +46,29 @@ namespace SignalRGame
             return connectionInfo;
         }
 
+        [FunctionName("Cleanup")]
+        public static async Task Cleanup([TimerTrigger("0 */5 * * * *")] TimerInfo myTimer, ILogger log,
+            [Blob(BlobStorageContainerName, FileAccess.Read)] CloudBlobContainer blobContainer)
+        {
+            BlobContinuationToken? continuationToken = null;
+            do
+            {
+                var response = await blobContainer.ListBlobsSegmentedAsync(continuationToken);
+                continuationToken = response.ContinuationToken;
+                foreach (var blob in response.Results)
+                {
+                    if (blob is CloudBlob cloudBlob &&
+                        cloudBlob is { Properties: { LastModified: DateTimeOffset lastModified } } &&
+                        lastModified < DateTimeOffset.Now.AddHours(-1))
+                    {
+                        await cloudBlob.DeleteIfExistsAsync();
+                    }
+                }
+            }
+            while (continuationToken != null);
+
+        }
+
         [FunctionName("createGame")]
         public static async Task<IActionResult> CreateGame(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequest req,
