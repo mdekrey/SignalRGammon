@@ -27,7 +27,9 @@
     "build": "react-scripts build",
     "test": "cross-env CI=true react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "lint": "eslint"
+    "lint": "eslint",
+    "build-docker": "docker build .. -f Dockerfile -t dekreydotnet.azurecr.io/signalrgammon",
+    "start-docker": "docker run --rm -ti -p3001:80 dekreydotnet.azurecr.io/signalrgammon:latest"
   },
   "eslintConfig": {
     "extends": "react-app"
