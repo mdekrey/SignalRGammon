@@ -1,9 +1,12 @@
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: signalr-gammon
   labels:
     app: signalr-gammon
+  annotations:
+    acme.cert-manager.io/http01-edit-in-place: "true"
+    cert-manager.io/issuer: letsencrypt
 spec:
   tls:
     - hosts:
@@ -14,6 +17,9 @@ spec:
       http:
         paths:
           - path: /
+            pathType: ImplementationSpecific
             backend:
-              serviceName: signalr-gammon
-              servicePort: 80
+              service:
+                name: signalr-gammon
+                port:
+                  number: 80
