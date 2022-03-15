@@ -1,9 +1,9 @@
-FROM mcr.microsoft.com/dotnet/core/aspnet:5.0.0-preview-buster-slim AS base
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
 EXPOSE 80
 
-FROM mcr.microsoft.com/dotnet/core/sdk:5.0.100-preview-buster AS build
-RUN curl -sL https://deb.nodesource.com/setup_10.x |  bash -
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+RUN curl -sL https://deb.nodesource.com/setup_16.x |  bash -
 RUN apt-get install -y nodejs
 
 WORKDIR /src

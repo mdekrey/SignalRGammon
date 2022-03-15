@@ -22,6 +22,7 @@
 **/secrets.dev.yaml
 **/values.dev.yaml
 **/*.local.*
+**/*.Development.*
 **/*.local
 LICENSE
 readme.md
