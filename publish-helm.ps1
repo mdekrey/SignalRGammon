@@ -23,5 +23,5 @@ $domain = 'games.dekrey.net'
 helm upgrade --install -n $ns $name --create-namespace mdekrey/single-container `
      --set-string "image.repository=$($fullImageName)" `
      --set-string "image.tag=$tag" `
-     --set-string "ingress.annotations.cert-manager\.io/cluster-issuer=letsencrypt" `
+     --set-string "ingress.tls.noSecret=true" `
      --set-string "ingress.hosts[0].host=$domain"
